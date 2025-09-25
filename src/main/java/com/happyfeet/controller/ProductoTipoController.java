@@ -53,8 +53,9 @@ public class ProductoTipoController {
     }
 
     public void actualizarProductoTipo(ProductoTipo productoTipo) {
-        if(validarProductoTipo(productoTipo)){
+        if(productoTipo.getId() > 0 && !productoTipo.getNombre().isEmpty()){
             productoTipoDAO.actualizarProductoTipo(productoTipo);
+            logger.info("Producto tipo actualizado correctamente");
         } else {
             logger.info("Error al actualizar el Producto Tipo. Datos invalidos");
         }
