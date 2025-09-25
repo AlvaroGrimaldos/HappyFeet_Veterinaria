@@ -4,9 +4,10 @@ import com.happyfeet.model.entities.ProductoTipo;
 import com.happyfeet.repository.IProductoTipoDAO;
 import com.happyfeet.repository.ProductoTipoDAO;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.List;
 
-import java.util.logging.Logger;
+
 
 public class ProductoTipoController {
     private static final Logger logger = (Logger) LogManager.getLogger(ProductoTipoController.class);
@@ -29,12 +30,23 @@ public class ProductoTipoController {
     }
 
     public void listarTodos() {
-        productoTipoDAO.listarTodos();
+        List<ProductoTipo> productos = productoTipoDAO.listarTodos();
+        if(productos.isEmpty()) {
+            logger.info("No hay productos tipos reegistrados");
+        }else {
+            productos.stream().forEach(n -> System.out.println(n));
+        }
     }
 
     public void buscarPorId(Integer id) {
-        if(id >= 0) {
-            productoTipoDAO.buscarPorId(id);
+        if(id > 0) {
+            ProductoTipo producto = productoTipoDAO.buscarPorId(id);
+            if(producto != null) {
+                System.out.println("Producto encontrado: " + producto);
+            } else {
+                logger.info("No se encontro un producto tipo con ID: " + id);
+            }
+
         } else {
             logger.info("Error. Id no valido, ingrese un id positivo");
         }
@@ -51,6 +63,7 @@ public class ProductoTipoController {
     public void eliminarProductoTipo(Integer id){
         if(id >= 0) {
             productoTipoDAO.eliminarProductoTipo(id);
+            logger.info("Producto tipo eliminado correctamente");
         }else {
             logger.info("Error al eliminar el Prodcuto Tipo. Id no valido");
         }
