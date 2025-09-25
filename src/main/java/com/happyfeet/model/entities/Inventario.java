@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public abstract class Inventario {
     private Integer id;
     private String nombreProducto;
-    private ProductoTipo productoTipo;
+    private Integer productoTipoId;
     private String descripcion;
     private String fabricante;
     private String lote;
@@ -15,9 +15,9 @@ public abstract class Inventario {
     private LocalDate fechaVencimiento;
     private BigDecimal precioVenta;
 
-    private Inventario(String nombreProducto, ProductoTipo productoTipo, String fabricante, String descripcion, String lote, Integer stockMinimo, Integer cantidadStock, LocalDate fechaVencimiento, BigDecimal precioVenta) {
+    public Inventario(String nombreProducto, Integer productoTipoId, String fabricante, String descripcion, String lote, Integer stockMinimo, Integer cantidadStock, LocalDate fechaVencimiento, BigDecimal precioVenta) {
         this.nombreProducto = nombreProducto;
-        this.productoTipo = productoTipo;
+        this.productoTipoId = productoTipoId;
         this.fabricante = fabricante;
         this.descripcion = descripcion;
         this.lote = lote;
@@ -27,11 +27,11 @@ public abstract class Inventario {
         this.precioVenta = precioVenta;
     }
 
-    public Inventario(String nombreProducto, Integer id, String descripcion, ProductoTipo productoTipo, String lote, String fabricante, Integer cantidadStock, Integer stockMinimo, LocalDate fechaVencimiento, BigDecimal precioVenta) {
+    public Inventario(String nombreProducto, Integer id, String descripcion, Integer productoTipoId, String lote, String fabricante, Integer cantidadStock, Integer stockMinimo, LocalDate fechaVencimiento, BigDecimal precioVenta) {
         this.nombreProducto = nombreProducto;
         this.id = id;
         this.descripcion = descripcion;
-        this.productoTipo = productoTipo;
+        this.productoTipoId = productoTipoId;
         this.lote = lote;
         this.fabricante = fabricante;
         this.cantidadStock = cantidadStock;
@@ -48,8 +48,8 @@ public abstract class Inventario {
         return nombreProducto;
     }
 
-    public ProductoTipo getProductoTipo() {
-        return productoTipo;
+    public Integer getProductoTipoId() {
+        return productoTipoId;
     }
 
     public Integer getCantidadStock() {
@@ -84,8 +84,8 @@ public abstract class Inventario {
         this.nombreProducto = nombreProducto;
     }
 
-    public void setProductoTipo(ProductoTipo productoTipo) {
-        this.productoTipo = productoTipo;
+    public void setProductoTipoId(Integer productoTipoId) {
+        this.productoTipoId = productoTipoId;
     }
 
     public void setFabricante(String fabricante) {
