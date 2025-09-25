@@ -3,9 +3,10 @@ package com.happyfeet.view;
 import com.happyfeet.controller.ProductoTipoController;
 import com.happyfeet.model.entities.ProductoTipo;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Scanner;
-import java.util.logging.Logger;
+
 
 public class ProductoTipoView {
     private static final Logger logger = (Logger) LogManager.getLogger(ProductoTipoView.class);
@@ -24,8 +25,9 @@ public class ProductoTipoView {
             System.out.println("""
                     1. Listar todos los productos tipos.
                     2. Agregar un producto tipo.
-                    3. Actualizar un producto tipo.
-                    4. Eliminar un producto tipo.
+                    3. Buscar por id.
+                    4. Actualizar un producto tipo.
+                    5. Eliminar un producto tipo.
                     0. Salir.
                     >>> Elige una opcion:
                     """);
@@ -35,14 +37,19 @@ public class ProductoTipoView {
                 switch (opcion) {
                     case "1":
                         listarTodos();
+                        break;
                     case "2":
                         agregarProductoTipo();
+                        break;
                     case "3":
                         buscarPorId();
+                        break;
                     case "4":
                         actualizarProductoTipo();
+                        break;
                     case "5":
                         eliminarProductoTipo();
+                        break;
                     case "0":
                         System.out.println("\nVoviendo al menu principal...");
                         break;
