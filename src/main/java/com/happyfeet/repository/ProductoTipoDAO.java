@@ -18,7 +18,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
 
     @Override
     public void agregarProductoTipo(ProductoTipo productoTipo) {
-        String sql = "insert into producto_tipo(nombre) values (?)";
+        String sql = "insert into producto_tipos(nombre) values (?)";
 
         try (PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setString(1, productoTipo.getNombre());
@@ -31,7 +31,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
     @Override
     public List<ProductoTipo> listarTodos() {
         List<ProductoTipo> lst = new ArrayList<>();
-        String sql = "select * from producto_tipo";
+        String sql = "select * from producto_tipos";
         try(Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -51,7 +51,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
     @Override
     public ProductoTipo buscarPorId(Integer id) {
         ProductoTipo pt = null;
-        String sql = "select * from producto_tipo where id = ?";
+        String sql = "select * from producto_tipos where id = ?";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, id);
@@ -71,7 +71,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
 
     @Override
     public void actualizarProductoTipo(ProductoTipo productoTipo) {
-        String sql = "update producto_tipo set nombre = ? where id = ?";
+        String sql = "update producto_tipos set nombre = ? where id = ?";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setString(1, productoTipo.getNombre());
@@ -84,7 +84,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
 
     @Override
     public void eliminarProductoTipo(Integer id) {
-        String sql = "delete from producto_tipo where id = ?";
+        String sql = "delete from producto_tipos where id = ?";
 
         try(PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, id);
