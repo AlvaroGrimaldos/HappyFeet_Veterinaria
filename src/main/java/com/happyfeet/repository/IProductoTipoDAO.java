@@ -1,4 +1,6 @@
-package com.happyfeet.model;
+package com.happyfeet.repository;
+
+import com.happyfeet.model.entities.ProductoTipo;
 
 import java.util.List;
 

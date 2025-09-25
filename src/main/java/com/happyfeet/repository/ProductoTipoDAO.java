@@ -1,6 +1,6 @@
-package com.happyfeet.model;
+package com.happyfeet.repository;
 
-import com.happyfeet.repository.ConexionDB;
+import com.happyfeet.model.entities.ProductoTipo;
 import org.apache.logging.log4j.LogManager;
 
 import java.sql.*;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class ProductoTipoDAO implements IProductoTipoDAO{
+public class ProductoTipoDAO implements IProductoTipoDAO {
     private static final Logger logger = (Logger) LogManager.getLogger(ProductoTipoDAO.class);
     private Connection con;
 

@@ -1,4 +1,4 @@
-package com.happyfeet.model;
+package com.happyfeet.model.entities;
 
 public class ProductoTipo {
     private Integer id;
