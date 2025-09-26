@@ -1,0 +1,150 @@
+package com.happyfeet.repository;
+
+import com.happyfeet.model.entities.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.math.BigDecimal;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class InventarioDAO implements IInventarioDAO{
+    private static final Logger logger = (Logger) LogManager.getLogger(InventarioDAO.class);
+    private Connection con;
+
+    public InventarioDAO(){ con = ConexionDB.getInstancia().getConnection();}
+
+    @Override
+    public void agregarInventario(Inventario inventario) {
+        String sql = "insert into inventario(nombre_producto, producto_tipo_id, descripcion, fabricante, lote, cantidad_stock, stock_minimo, fecha_vencimiento, precio_venta) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, inventario.getNombreProducto());
+            pstmt.setInt(2, inventario.getProductoTipoId());
+            pstmt.setString(3, inventario.getDescripcion());
+            pstmt.setString(4, inventario.getFabricante());
+            pstmt.setString(5, inventario.getLote());
+            pstmt.setInt(6, inventario.getCantidadStock());
+            pstmt.setInt(7, inventario.getStockMinimo());
+            pstmt.setDate(8, Date.valueOf(inventario.getFechaVencimiento()));
+            pstmt.setBigDecimal(9, inventario.getPrecioVenta());
+            pstmt.executeUpdate();
+        }catch (SQLException e){
+            logger.info("Error al agregar el inentario.{}", e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Inventario> listarTodos() {
+        List<Inventario> lst = new ArrayList<>();
+        String sql = "select * from inventario";
+        try(Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+
+            while(rs.next()) {
+                Inventario i = crearInventarioPorTipo(
+                        rs.getString("nombre_producto"),
+                        rs.getInt("id"),
+                        rs.getString("descripcion"),
+                        rs.getInt("producto_tipo_id"),
+                        rs.getString("fabricante"),
+                        rs.getString("lote"),
+                        rs.getInt("cantidad_stock"),
+                        rs.getInt("stock_minimo"),
+                        rs.getDate("fecha_vencimiento").toLocalDate(),
+                        rs.getBigDecimal("precio_venta"));
+
+                lst.add(i);
+            }
+        }catch(SQLException e) {
+            logger.info("Error al consultar todo el inventario{}", e.getMessage());
+        }
+        return lst;
+    }
+
+    @Override
+    public Inventario buscarPorId(Integer id) {
+        String sql = "select * from inventario where id= ?";
+
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+
+            try(ResultSet rs = pstmt.executeQuery()) {
+                if(rs.next()) {
+                    return crearInventarioPorTipo(
+                            rs.getString("nombre_producto"),
+                            rs.getInt("id"),
+                            rs.getString("descripcion"),
+                            rs.getInt("producto_tipo_id"),
+                            rs.getString("lote"),
+                            rs.getString("fabricante"),
+                            rs.getInt("cantidad_stock"),
+                            rs.getInt("stock_minimo"),
+                            rs.getDate("fecha_vencimiento").toLocalDate(),
+                            rs.getBigDecimal("precio_venta")
+                    );
+                }
+            }
+        }catch (SQLException e) {
+            logger.error("Error al buscar inventario por ID{}: {}", id, e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void actualizarInventario(Inventario inventario) {
+        String sql = "update inventario set nombre_producto = ?, descripcion = ?, producto_tipo_id = ?, lote = ?, fabricante = ?, cantidad_stock = ?, stock_minimo = ?, fecha_vencimiento = ?, precio_venta = ? where id = ?";
+
+        try(PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setString(1, inventario.getNombreProducto());
+            pstmt.setString(2, inventario.getDescripcion());
+            pstmt.setInt(3, inventario.getProductoTipoId());
+            pstmt.setString(4, inventario.getLote());
+            pstmt.setString(5, inventario.getFabricante());
+            pstmt.setInt(6, inventario.getCantidadStock());
+            pstmt.setInt(7, inventario.getStockMinimo());
+            pstmt.setDate(8, Date.valueOf(inventario.getFechaVencimiento()));
+            pstmt.setBigDecimal(9, inventario.getPrecioVenta());
+        }catch (SQLException e) {
+            logger.info("Error al actualizar el inventario con id {}: {}", inventario.getId(), e.getMessage());
+        }
+    }
+
+    @Override
+    public void eliminarInventario(Integer id) {
+        String sql = "delete from inventario where id = ?";
+
+        try(PreparedStatement pstmt = con.prepareStatement(sql)){
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        }catch (SQLException e) {
+            logger.info("Error al eliminar el inventario con id {}: {}", id, e.getMessage());
+        }
+    }
+
+    private Inventario crearInventarioPorTipo(String nombreProducto, Integer id, String descripcion, Integer productoTipoId, String lote, String fabricante, Integer cantidadStock, Integer stockMinimo, LocalDate fechaVencimiento, BigDecimal precioVenta) {
+        Inventario inventario = null;
+        switch(productoTipoId) {
+            case 1:
+                inventario = new Medicamento(nombreProducto, productoTipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fechaVencimiento, precioVenta);
+                break;
+            case 2:
+                inventario = new Vacuna(nombreProducto, productoTipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fechaVencimiento, precioVenta);
+                break;
+            case 3:
+                inventario = new InsumoMedico(nombreProducto, productoTipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fechaVencimiento, precioVenta);
+                break;
+            case 4:
+                inventario = new Alimento(nombreProducto, productoTipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fechaVencimiento, precioVenta);
+                break;
+            default:
+                logger.info("Tipo de producto no reconocido.{}", productoTipoId);
+        }
+
+        inventario.setId(id);
+
+        return inventario;
+    }
+}

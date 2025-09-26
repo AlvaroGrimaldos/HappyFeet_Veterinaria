@@ -108,6 +108,18 @@ public abstract class Inventario {
         this.precioVenta = precioVenta;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public void setLote(String lote) {
+        this.lote = lote;
+    }
+
     public abstract String getTipo();
 
     @Override

@@ -25,7 +25,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
             pstmt.setString(1, productoTipo.getNombre());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            logger.info("Error al agregar el Producto Tipo" + e.getMessage());
+            logger.info("Error al agregar el Producto Tipo{}", e.getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
                 lst.add(pt);
             }
         }catch(SQLException e){
-            logger.info("Error al consultar todos los estudiantes" + e.getMessage());
+            logger.info("Error al consultar todos los estudiantes{}", e.getMessage());
         }
 
         return lst;
@@ -64,7 +64,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
                 }
             }
         } catch(SQLException e) {
-            logger.info("Error al consultar el producto tipo por ID: " + id);
+            logger.info("Error al consultar el producto tipo por ID: {}", id);
         }
 
         return pt;
@@ -79,7 +79,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
             pstmt.setInt(2, productoTipo.getId());
             pstmt.executeUpdate();
         }catch(SQLException e) {
-            logger.info("Error al actualizar el producto tipo: " + productoTipo);
+            logger.info("Error al actualizar el producto tipo: {}", productoTipo);
         }
     }
 
@@ -91,7 +91,7 @@ public class ProductoTipoDAO implements IProductoTipoDAO {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         }catch (SQLException e) {
-            logger.info("Error al eliminar el producto tipo con ID: " + id);
+            logger.info("Error al eliminar el producto tipo con ID: {}", id);
         }
     }
 }
