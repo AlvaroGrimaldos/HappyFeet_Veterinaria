@@ -42,9 +42,9 @@ public class ProductoTipoController {
         if(id > 0) {
             ProductoTipo producto = productoTipoDAO.buscarPorId(id);
             if(producto != null) {
-                System.out.println("Producto encontrado: " + producto);
+                System.out.println("Producto tipo encontrado: " + producto);
             } else {
-                logger.info("No se encontro un producto tipo con ID: " + id);
+                logger.info("No se encontro un producto tipo con ID: {}", id);
             }
 
         } else {
