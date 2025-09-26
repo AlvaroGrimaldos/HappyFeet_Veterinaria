@@ -1,6 +1,7 @@
 package com.happyfeet.repository;
 
 import com.happyfeet.model.entities.*;
+import com.happyfeet.model.entities.observer.Observer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -146,5 +147,17 @@ public class InventarioDAO implements IInventarioDAO{
         inventario.setId(id);
 
         return inventario;
+    }
+
+    private List<Observer> observers = new ArrayList<>();
+
+    public void addObserver(Observer o) { observers.add(o);}
+    public void notifyObservers(Inventario i) {
+        observers.stream().forEach(o -> o.update(i));
+    }
+
+    public void actualizarStock(Inventario i, int cantidadVendida) {
+        i.setCantidadStock(i.getCantidadStock() - cantidadVendida);
+        notifyObservers(i);
     }
 }
