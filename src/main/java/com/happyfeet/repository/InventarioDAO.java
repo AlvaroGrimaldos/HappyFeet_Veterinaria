@@ -156,7 +156,8 @@ public class InventarioDAO implements IInventarioDAO{
         observers.stream().forEach(o -> o.update(i));
     }
 
-    public void actualizarStock(Inventario i, int cantidadVendida) {
+    @Override
+    public void actualizarStockVenta(Inventario i, int cantidadVendida) {
         String sql = "update inventario set cantidad_stock = ? where id = ?";
         try (PreparedStatement pstmt = con.prepareStatement(sql)){
             int nuevoStock = i.getCantidadStock() - cantidadVendida;
@@ -171,6 +172,26 @@ public class InventarioDAO implements IInventarioDAO{
 
         } catch (SQLException e) {
             logger.info("Error al actualizar el stock del producto {}", i.getNombreProducto());
+        }
+    }
+
+    @Override
+    public void agregarStock(Inventario i, int cantidad, LocalDate fecha){
+        String sql = "update inventario set cantidad_stock = ?, fecha_vencimiento = ? where id = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sql)){
+            int nuevoStock = i.getCantidadStock() + cantidad;
+
+            pstmt.setInt(1, nuevoStock);
+            pstmt.setDate(2, Date.valueOf(fecha));
+            pstmt.setInt(3, i.getId());
+            pstmt.executeUpdate();
+
+            i.setCantidadStock((nuevoStock));
+
+            notifyObservers(i);
+
+        } catch (SQLException e) {
+            logger.info("Error al agregar stock del producto {}", i.getNombreProducto());
         }
     }
 }
