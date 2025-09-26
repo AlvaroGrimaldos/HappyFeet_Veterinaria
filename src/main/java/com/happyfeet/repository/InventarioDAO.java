@@ -157,7 +157,20 @@ public class InventarioDAO implements IInventarioDAO{
     }
 
     public void actualizarStock(Inventario i, int cantidadVendida) {
-        i.setCantidadStock(i.getCantidadStock() - cantidadVendida);
-        notifyObservers(i);
+        String sql = "update inventario set cantidad_stock = ? where id = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sql)){
+            int nuevoStock = i.getCantidadStock() - cantidadVendida;
+
+            pstmt.setInt(1, nuevoStock);
+            pstmt.setInt(2, i.getId());
+            pstmt.executeUpdate();
+
+            i.setCantidadStock((nuevoStock));
+
+            notifyObservers(i);
+
+        } catch (SQLException e) {
+            logger.info("Error al actualizar el stock del producto {}", i.getNombreProducto());
+        }
     }
 }
