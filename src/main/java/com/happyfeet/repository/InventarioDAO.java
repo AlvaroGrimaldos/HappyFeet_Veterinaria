@@ -60,7 +60,7 @@ public class InventarioDAO implements IInventarioDAO{
                 lst.add(i);
             }
         }catch(SQLException e) {
-            logger.info("Error al consultar todo el inventario{}", e.getMessage());
+            logger.error("Error al consultar todo el inventario{}", e.getMessage());
         }
         return lst;
     }

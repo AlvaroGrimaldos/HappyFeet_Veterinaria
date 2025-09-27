@@ -20,7 +20,7 @@ public class ItemsFactura {
         this.precioUnitario = precioUnitario;
     }
 
-    public ItemsFactura(Integer id, Integer facturaId, Integer productoId, BigDecimal precioUnitario, String servicioDescripcion, Integer cantidad, BigDecimal subtotal) {
+    public ItemsFactura(Integer id, Integer facturaId, Integer productoId, String servicioDescripcion, Integer cantidad, BigDecimal precioUnitario,  BigDecimal subtotal) {
         this.id = id;
         this.facturaId = facturaId;
         this.productoId = productoId;
