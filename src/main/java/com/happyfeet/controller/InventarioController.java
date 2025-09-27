@@ -19,7 +19,7 @@ public class InventarioController {
         if (validarInventario(inventario)) {
             inventarioDAO.agregarInventario(inventario);
         } else {
-            logger.info("Error al agregar inventario. Datos invalidos");
+            logger.error("Error al agregar inventario. Datos invalidos");
         }
     }
 
@@ -55,7 +55,7 @@ public class InventarioController {
                 logger.info("No se encontro un producto con id {}", id);
             }
         } else {
-            logger.info("Error. Id no valido, ingrese un id valido");
+            logger.error("Error. Id no valido, ingrese un id valido");
         }
     }
 
@@ -73,7 +73,7 @@ public class InventarioController {
             inventarioDAO.eliminarInventario(id);
             logger.info("Inventario eliminado correctamente");
         }else {
-            logger.info("Error al eliminar el inventario de id {}", id);
+            logger.error("Error al eliminar el inventario de id {}", id);
         }
     }
 
@@ -82,7 +82,7 @@ public class InventarioController {
             inventarioDAO.agregarStock(inventario, cantidad, fecha);
             logger.info("Stock actualizado de {}", inventario.getNombreProducto());
         }else {
-            logger.info("Error al agregar stock de {}", inventario.getNombreProducto());
+            logger.error("Error al agregar stock de {}", inventario.getNombreProducto());
         }
     }
 }
