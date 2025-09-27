@@ -1,6 +1,8 @@
 package com.happyfeet.controller;
 
+import com.happyfeet.model.entities.Inventario;
 import com.happyfeet.model.entities.ItemsFactura;
+import com.happyfeet.repository.IInventarioDAO;
 import com.happyfeet.repository.IItemsFacturaDAO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,12 +12,18 @@ import java.util.List;
 public class ItemsFacturaController {
     private static final Logger logger =  LogManager.getLogger(ProductoTipoController.class);
     private IItemsFacturaDAO itemsFacturaDAO;
+    private IInventarioDAO inventarioDAO;
 
-    public ItemsFacturaController(IItemsFacturaDAO itemsFacturaDAO) { this.itemsFacturaDAO = itemsFacturaDAO; }
+    public ItemsFacturaController(IItemsFacturaDAO itemsFacturaDAO, IInventarioDAO inventarioDAO) {
+        this.itemsFacturaDAO = itemsFacturaDAO;
+        this.inventarioDAO = inventarioDAO;
+    }
 
     public void agregarItemFactura(ItemsFactura itemsFactura){
         if (validarItemsFactura(itemsFactura)){
             itemsFacturaDAO.agregarItemFactura(itemsFactura);
+            Inventario inventario = inventarioDAO.buscarPorId(itemsFactura.getProductoId());
+            inventarioDAO.actualizarStockVenta(inventario, itemsFactura.getCantidad());
         }else {
             logger.error("Error al agregar items factura. Datos Invalidos");
         }
