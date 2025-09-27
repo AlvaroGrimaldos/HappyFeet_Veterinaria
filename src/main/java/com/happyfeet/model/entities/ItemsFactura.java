@@ -11,7 +11,7 @@ public class ItemsFactura {
     private BigDecimal precioUnitario;
     private BigDecimal subtotal;
 
-    public ItemsFactura(Integer facturaId, Integer productoId, String servicioDescripcion, BigDecimal subtotal, Integer cantidad, BigDecimal precioUnitario) {
+    public ItemsFactura(Integer facturaId, Integer productoId, String servicioDescripcion, Integer subtotal, BigDecimal cantidad, BigDecimal precioUnitario) {
         this.facturaId = facturaId;
         this.productoId = productoId;
         this.servicioDescripcion = servicioDescripcion;

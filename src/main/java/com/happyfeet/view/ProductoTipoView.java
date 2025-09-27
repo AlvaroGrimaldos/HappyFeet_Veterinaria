@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 
 public class ProductoTipoView {
-    private static final Logger logger = (Logger) LogManager.getLogger(ProductoTipoView.class);
+    private static final Logger logger = LogManager.getLogger(ProductoTipoView.class);
     private final ProductoTipoController controller;
     private final Scanner input;
 
@@ -55,12 +55,12 @@ public class ProductoTipoView {
                         System.out.println("\nVoviendo al menu principal...");
                         break;
                     default:
-                        logger.info("Error. Opcion invalida.");
+                        logger.error("Error. Opcion invalida.");
                         System.out.println("Presione cualquier tecla para continuar...");
                         input.nextLine();
                 }
             }catch(Exception e) {
-                logger.info("Error al leer la opcion del menu " + e.getMessage());
+                logger.error("Error al leer la opcion del menu {}", e.getMessage());
                 System.out.println("Presione cualquier tecla para continuar...");
                 input.nextLine();
                 opcion = "";
