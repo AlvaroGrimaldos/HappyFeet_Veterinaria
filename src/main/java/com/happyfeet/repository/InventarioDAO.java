@@ -108,6 +108,8 @@ public class InventarioDAO implements IInventarioDAO{
             pstmt.setInt(7, inventario.getStockMinimo());
             pstmt.setDate(8, Date.valueOf(inventario.getFechaVencimiento()));
             pstmt.setBigDecimal(9, inventario.getPrecioVenta());
+            pstmt.setInt(10, inventario.getId());
+            pstmt.executeUpdate();
         }catch (SQLException e) {
             logger.info("Error al actualizar el inventario con id {}: {}", inventario.getId(), e.getMessage());
         }
