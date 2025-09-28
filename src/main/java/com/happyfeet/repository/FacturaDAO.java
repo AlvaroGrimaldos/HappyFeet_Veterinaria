@@ -1,6 +1,9 @@
 package com.happyfeet.repository;
 
+import com.happyfeet.model.entities.CentroVeterinario;
 import com.happyfeet.model.entities.Facturas;
+import com.happyfeet.model.entities.ItemsFactura;
+import com.happyfeet.model.entities.service.PDFGeneratorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,9 +14,11 @@ import java.util.List;
 public class FacturaDAO implements IFacturasDAO{
     private static final Logger logger = LogManager.getLogger(FacturaDAO.class);
     private Connection con;
+    private PDFGeneratorService pdfService;
 
     public FacturaDAO() {
         con = ConexionDB.getInstancia().getConnection();
+        pdfService = new PDFGeneratorService();
     }
 
 
@@ -55,6 +60,9 @@ public class FacturaDAO implements IFacturasDAO{
                         Integer generatedId = rs.getInt(1);
                         facturas.setId(generatedId);
                         logger.info("Factura agregada exitosamente con ID: {}", generatedId);
+
+                        generarPDFAutomatico(facturas);
+
                         return facturas;
                     }
                 }
@@ -65,6 +73,29 @@ public class FacturaDAO implements IFacturasDAO{
 
         return null;
     }
+
+    private void generarPDFAutomatico(Facturas factura) {
+        try {
+            List<ItemsFactura> items = obtenerItemsDeFactura(factura.getId());
+            if (items != null && !items.isEmpty()) {
+                String rutaCompleta = pdfService.generarRutaCompleta(factura.getId(), null);
+                boolean exito = pdfService.generarFacturaPDF(factura, items, rutaCompleta);
+
+                if (exito) {
+                    System.out.println("\n ¡FACTURA CREADA Y PDF GENERADO AUTOMÁTICAMENTE!");
+                    System.out.println(" Archivo guardado en: " + rutaCompleta);
+                    mostrarResumenEnConsola(factura, items);
+                } else {
+                    logger.warn("Factura creada pero falló la generación automática del PDF");
+                }
+            } else {
+                logger.warn("Factura creada sin items, PDF no generado automáticamente");
+            }
+        } catch (Exception e) {
+            logger.warn("Error al generar PDF automático para factura {}: {}", factura.getId(), e.getMessage());
+        }
+    }
+
 
     @Override
     public List<Facturas> listarTodos() {
@@ -149,7 +180,98 @@ public class FacturaDAO implements IFacturasDAO{
 
     @Override
     public void imprimirFacturaPorId(Integer id) {
+        imprimirFacturaEnPDF(id, null); // Usar ruta por defecto
+    }
 
+    // Método mejorado para generar PDF
+    public boolean imprimirFacturaEnPDF(Integer id, String rutaDestino) {
+        Facturas factura = buscarPorId(id);
+        if (factura == null) {
+            logger.error("No se encontró factura con ID: {}", id);
+            return false;
+        }
+
+        List<ItemsFactura> items = obtenerItemsDeFactura(id);
+
+        try {
+            // Generar ruta si no se proporciona
+            String rutaCompleta;
+            if (rutaDestino == null) {
+                rutaCompleta = pdfService.generarRutaCompleta(id, null); // Usa ruta por defecto
+            } else {
+                rutaCompleta = rutaDestino;
+            }
+
+            // Generar el PDF
+            boolean exito = pdfService.generarFacturaPDF(factura, items, rutaCompleta);
+
+            if (exito) {
+                System.out.println("\n📄 ¡FACTURA GENERADA EXITOSAMENTE EN PDF!");
+                System.out.println("📁 Archivo guardado en: " + rutaCompleta);
+
+                // También mostrar resumen en consola
+                mostrarResumenEnConsola(factura, items);
+
+                return true;
+            } else {
+                logger.error("Error al generar PDF para factura ID: {}", id);
+                return false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Error inesperado al generar PDF de factura: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private void mostrarResumenEnConsola(Facturas factura, List<ItemsFactura> items) {
+        CentroVeterinario centro = CentroVeterinario.getInstancia();
+
+        System.out.println("\n========== RESUMEN FACTURA #" + String.format("%06d", factura.getId()) + " ==========");
+        System.out.println(" " + centro.getNombre() + " - " + centro.getTelefono());
+        System.out.println(" Fecha: " + factura.getFechaEmision());
+        System.out.println(" Cliente ID: " + factura.getDuenoId());
+        System.out.println(" Centro ID: " + factura.getCentroVeterinarioId());
+        System.out.println("\n--- PRODUCTOS/SERVICIOS (" + items.size() + " items) ---");
+
+        for (ItemsFactura item : items) {
+            String descripcion = item.getServicioDescripcion();
+            if (descripcion == null || descripcion.trim().isEmpty()) {
+                descripcion = "Producto ID: " + item.getProductoId();
+            }
+            System.out.println("• " + descripcion + " (x" + item.getCantidad() + ") - $" + item.getSubtotal());
+        }
+
+        System.out.println("\n TOTAL: $" + factura.getTotal());
+        System.out.println("==========================================\n");
+    }
+
+    private List<ItemsFactura> obtenerItemsDeFactura(Integer facturaId) {
+        List<ItemsFactura> items = new ArrayList<>();
+        String sql = "SELECT * FROM items_factura WHERE factura_id = ?";
+
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, facturaId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    ItemsFactura item = new ItemsFactura(
+                            rs.getInt("id"),
+                            rs.getInt("factura_id"),
+                            rs.getInt("producto_id"),
+                            rs.getString("servicio_descripcion"),
+                            rs.getInt("cantidad"),
+                            rs.getBigDecimal("precio_unitario"),
+                            rs.getBigDecimal("subtotal")
+                    );
+                    items.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error al obtener items de factura ID: {}", facturaId);
+        }
+
+        return items;
     }
 
     @Override
@@ -229,5 +351,32 @@ public class FacturaDAO implements IFacturasDAO{
         }
 
         return total;
+    }
+
+    // Método para regenerar PDF de facturas existentes
+    public boolean regenerarPDF(Integer facturaId, String rutaDestino) {
+        return imprimirFacturaEnPDF(facturaId, rutaDestino);
+    }
+
+    // Método para verificar si existe el PDF de una factura
+    public boolean existePDF(Integer facturaId) {
+        try {
+            String rutaCompleta = pdfService.generarRutaCompleta(facturaId, null);
+            java.io.File archivo = new java.io.File(rutaCompleta);
+            return archivo.exists();
+        } catch (Exception e) {
+            logger.error("Error al verificar existencia de PDF para factura {}: {}", facturaId, e.getMessage());
+            return false;
+        }
+    }
+
+    // Método para obtener la ruta del PDF de una factura
+    public String obtenerRutaPDF(Integer facturaId) {
+        try {
+            return pdfService.generarRutaCompleta(facturaId, null);
+        } catch (Exception e) {
+            logger.error("Error al obtener ruta de PDF para factura {}: {}", facturaId, e.getMessage());
+            return null;
+        }
     }
 }
