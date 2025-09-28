@@ -10,7 +10,7 @@ public abstract class InventarioCreator {
 
     public Inventario registrarNuevoInventario(String nombreProducto, Integer productoTipoId, String fabricante, String descripcion, String lote, Integer stockMinimo, Integer cantidadStock, LocalDate fechaVencimiento, BigDecimal precioVenta) {
         Inventario nuevoInventario = createInventario(nombreProducto, productoTipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fechaVencimiento, precioVenta);
-        System.out.println("Se ha creado la persona con los datos: " + nuevoInventario);
+        System.out.println("Se ha creado el inventario con los datos: " + nuevoInventario);
         return nuevoInventario;
     }
 }

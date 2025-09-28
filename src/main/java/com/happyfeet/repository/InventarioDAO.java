@@ -12,8 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InventarioDAO implements IInventarioDAO{
-    private static final Logger logger = (Logger) LogManager.getLogger(InventarioDAO.class);
+    private static final Logger logger =  LogManager.getLogger(InventarioDAO.class);
     private Connection con;
+
+    private List<Observer> observers = new ArrayList<>();
 
     public InventarioDAO(){ con = ConexionDB.getInstancia().getConnection();}
 
@@ -144,18 +146,22 @@ public class InventarioDAO implements IInventarioDAO{
                 break;
             default:
                 logger.info("Tipo de producto no reconocido.{}", productoTipoId);
+                return null;
         }
 
-        inventario.setId(id);
+        if(inventario != null){
+            inventario.setId(id);
+        }
+
 
         return inventario;
     }
 
-    private List<Observer> observers = new ArrayList<>();
+
 
     public void addObserver(Observer o) { observers.add(o);}
     public void notifyObservers(Inventario i) {
-        observers.stream().forEach(o -> o.update(i));
+        observers.forEach(o -> o.update(i));
     }
 
     @Override
@@ -164,13 +170,21 @@ public class InventarioDAO implements IInventarioDAO{
         try (PreparedStatement pstmt = con.prepareStatement(sql)){
             int nuevoStock = i.getCantidadStock() - cantidadVendida;
 
+            if(nuevoStock < 0) {
+                logger.error("Error: Stock Insuficiente. Stock actual {}", i.getCantidadStock());
+            }
+
             pstmt.setInt(1, nuevoStock);
             pstmt.setInt(2, i.getId());
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
 
-            i.setCantidadStock((nuevoStock));
+            if (rowsAffected > 0) {
+                i.setCantidadStock(nuevoStock);
+                logger.info("Stock actualizado para {}: {} -> {}",
+                        i.getNombreProducto(), i.getCantidadStock() + cantidadVendida, nuevoStock);
 
-            notifyObservers(i);
+                notifyObservers(i);
+            }
 
         } catch (SQLException e) {
             logger.info("Error al actualizar el stock del producto {}", i.getNombreProducto());
@@ -181,16 +195,22 @@ public class InventarioDAO implements IInventarioDAO{
     public void agregarStock(Inventario i, int cantidad, LocalDate fecha){
         String sql = "update inventario set cantidad_stock = ?, fecha_vencimiento = ? where id = ?";
         try (PreparedStatement pstmt = con.prepareStatement(sql)){
+            int stockAnterior = i.getCantidadStock();
             int nuevoStock = i.getCantidadStock() + cantidad;
 
             pstmt.setInt(1, nuevoStock);
             pstmt.setDate(2, Date.valueOf(fecha));
             pstmt.setInt(3, i.getId());
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
 
-            i.setCantidadStock((nuevoStock));
+            if (rowsAffected > 0) {
+                i.setCantidadStock(nuevoStock);
+                i.setFechaVencimiento(fecha);
+                logger.info("Stock agregado para {}: {} -> {} (+{})",
+                        i.getNombreProducto(), stockAnterior, nuevoStock, cantidad);
 
-            notifyObservers(i);
+                notifyObservers(i);
+            }
 
         } catch (SQLException e) {
             logger.info("Error al agregar stock del producto {}", i.getNombreProducto());

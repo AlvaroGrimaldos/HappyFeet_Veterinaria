@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class InventarioController {
-    private static final Logger logger = (Logger) LogManager.getLogger(InventarioController.class);
+    private static final Logger logger = LogManager.getLogger(InventarioController.class);
     private IInventarioDAO inventarioDAO;
 
     public InventarioController(IInventarioDAO inventarioDAO) { this.inventarioDAO = inventarioDAO; }

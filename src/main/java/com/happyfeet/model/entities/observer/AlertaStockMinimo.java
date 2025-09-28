@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AlertaStockMinimo implements Observer{
-    private static final Logger logger = (Logger) LogManager.getLogger(AlertaStockMinimo.class);
+    private static final Logger logger = LogManager.getLogger(AlertaStockMinimo.class);
     @Override
     public void update(Inventario inventario) {
         if(inventario.getCantidadStock() < inventario.getStockMinimo()){

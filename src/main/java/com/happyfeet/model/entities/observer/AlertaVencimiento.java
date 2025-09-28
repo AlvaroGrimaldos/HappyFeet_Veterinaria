@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import java.time.LocalDate;
 
 public class AlertaVencimiento implements Observer{
-    private static final Logger logger = (Logger) LogManager.getLogger(AlertaVencimiento.class);
+    private static final Logger logger = LogManager.getLogger(AlertaVencimiento.class);
     @Override
     public void update(Inventario inventario) {
         if(inventario.getFechaVencimiento().isBefore(LocalDate.now().plusDays(5))) {

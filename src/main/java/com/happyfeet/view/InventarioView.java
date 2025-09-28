@@ -12,10 +12,11 @@ import org.apache.logging.log4j.Logger;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class InventarioView {
-    private static final Logger logger = (Logger) LogManager.getLogger(InventarioView.class);
+    private static final Logger logger = LogManager.getLogger(InventarioView.class);
     private final InventarioController controller;
     private final Scanner input;
     private IInventarioDAO inventarioDAO;
@@ -41,7 +42,7 @@ public class InventarioView {
                     """);
 
             try {
-                opcion = input.nextLine();
+                opcion = input.nextLine().trim();
                 switch (opcion) {
                     case "1":
                         listarTodos();
@@ -107,8 +108,14 @@ public class InventarioView {
             System.out.println("Stock Minimo: ");
             Integer stockMinimo = input.nextInt();
 
+
             System.out.println("Fecha de Vencimiento (YYYY-MM-DD): ");
-            LocalDate fecha = LocalDate.parse(input.nextLine().trim());
+            LocalDate fecha = null;
+            try {
+                fecha = LocalDate.parse(input.nextLine().trim());
+            }catch (DateTimeParseException e){
+                logger.error("Formato de fecha invalido. Use el formato YYYY-MM-DD");
+            }
 
             System.out.println("Precio de Venta: ");
             BigDecimal precioVenta = input.nextBigDecimal();
@@ -162,12 +169,18 @@ public class InventarioView {
             Integer id = leerEntero(input, "ID: ");
             input.nextLine();
 
+            Inventario inventario = inventarioDAO.buscarPorId(id);
+            if (inventario == null) {
+                System.out.println("Error: No se encontró inventario con ID: " + id);
+                return;
+            }
+
             Integer cantidad = leerEntero(input, "Cantidad a agregar: ");
             input.nextLine();
 
             System.out.println("Nueva Fecha de Vencimiento (YYYY-MM-DD): ");
             LocalDate fecha = LocalDate.parse(input.nextLine().trim());
-            Inventario inventario = inventarioDAO.buscarPorId(id);
+
             if (id > 0) {
                 controller.agregarStock(inventario, cantidad, fecha);
             }
