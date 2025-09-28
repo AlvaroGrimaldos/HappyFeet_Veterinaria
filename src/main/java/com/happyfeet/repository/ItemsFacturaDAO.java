@@ -1,6 +1,8 @@
 package com.happyfeet.repository;
 
+import com.happyfeet.model.entities.Inventario;
 import com.happyfeet.model.entities.ItemsFactura;
+import com.happyfeet.model.entities.observer.Observer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +13,13 @@ import java.util.List;
 public class ItemsFacturaDAO implements IItemsFacturaDAO{
     private static final Logger logger = LogManager.getLogger(ItemsFacturaDAO.class);
     private Connection con;
+
+    private List<Observer> observers = new ArrayList<>();
+
+    public void addObserver(Observer o) { observers.add(o);}
+    public void notifyObservers(Inventario i) {
+        observers.forEach(o -> o.update(i));
+    }
 
     public ItemsFacturaDAO(){ con = ConexionDB.getInstancia().getConnection();}
 
@@ -25,7 +34,21 @@ public class ItemsFacturaDAO implements IItemsFacturaDAO{
             pstmt.setInt(4, itemsFactura.getCantidad());
             pstmt.setBigDecimal(5, itemsFactura.getPrecioUnitario());
             pstmt.setBigDecimal(6, itemsFactura.getSubtotal());
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
+
+            if(rowsAffected > 0) {
+                logger.info("Item factura agregado exitosamente");
+
+                try{
+                    InventarioDAO inventarioDAO = new InventarioDAO();
+                    Inventario inventario = inventarioDAO.buscarPorId(itemsFactura.getProductoId());
+                    if(inventario != null) {
+                        notifyObservers(inventario);
+                    }
+                }catch (Exception e){
+                    logger.warn("Error al notificar observers: {}", e.getMessage());
+                }
+            }
         }catch(SQLException e){
             logger.error("Error al agregar el Item Factura {}", e.getMessage());
         }

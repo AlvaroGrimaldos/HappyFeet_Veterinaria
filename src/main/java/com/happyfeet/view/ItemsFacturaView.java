@@ -38,7 +38,7 @@ public class ItemsFacturaView {
                     """);
 
             try{
-                opcion = input.nextLine();
+                opcion = input.nextLine().trim();
                 switch (opcion){
                     case "1":
                         listarTodos();
@@ -82,20 +82,47 @@ public class ItemsFacturaView {
 
             Integer productoId = leerEntero(input, "Producto ID: ");
 
+            Inventario inventario = inventarioDAO.buscarPorId(productoId);
+            if (inventario == null) {
+                logger.error("Error: No se encontró el producto con ID: {}",  productoId);
+                return;
+            }
+
             System.out.println("Servicio Descripcion: ");
             String servicioDescripcion = input.nextLine();
 
-            Integer cantidad = leerEntero(input, "Cantidad: ");
+            Integer cantidad;
+            do {
+                cantidad = leerEntero(input, "Cantidad (disponible: " + inventario.getCantidadStock() + "): ");
+                if (cantidad > inventario.getCantidadStock()) {
+                    System.out.println("Error: Cantidad solicitada excede el stock disponible.");
+                }
+            } while (cantidad > inventario.getCantidadStock());
 
-            Inventario inventario = inventarioDAO.buscarPorId(productoId);
             BigDecimal precio_unitario = inventario.getPrecioVenta();
 
             BigDecimal subtotal = precio_unitario.multiply(BigDecimal.valueOf(cantidad));
 
-            controller.agregarItemFactura(new ItemsFactura(facturaId, productoId, servicioDescripcion, cantidad, precio_unitario, subtotal));
+            controller.agregarItemFactura(new ItemsFactura(facturaId, productoId, servicioDescripcion, precio_unitario, cantidad, subtotal));
         }catch (Exception e){
             logger.error("Error al agregar item factura: {}", e.getMessage());
         }
+    }
+
+    private void buscarPorId(){
+        System.out.println("\n\n --- 3. BUSCAR POR ID:\n");
+        Integer id = leerEntero(input, "ID: ");
+        input.nextLine();
+
+        controller.buscarPorId(id);
+    }
+
+    private void eliminarItemFactura() {
+        System.out.println("\n\n --- 5. ELIMINAR UN ITEM FACTURA:\n");
+        Integer id = leerEntero(input, "ID: ");
+        input.nextLine();
+
+        controller.eliminarItemFactura(id);
     }
 
 

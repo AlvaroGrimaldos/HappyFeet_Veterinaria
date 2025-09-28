@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 
 public class ItemsFacturaController {
-    private static final Logger logger =  LogManager.getLogger(ProductoTipoController.class);
+    private static final Logger logger =  LogManager.getLogger(ItemsFacturaController.class);
     private IItemsFacturaDAO itemsFacturaDAO;
     private IInventarioDAO inventarioDAO;
 
@@ -32,8 +32,6 @@ public class ItemsFacturaController {
     private boolean validarItemsFactura(ItemsFactura itemsFactura){
         if(itemsFactura == null) return false;
         if(itemsFactura.getFacturaId() == null) return false;
-        if(itemsFactura.getProductoId() == null) return false;
-        if(itemsFactura.getServicioDescripcion() == null) return false;
         if(itemsFactura.getCantidad() == null) return false;
         if(itemsFactura.getPrecioUnitario() == null) return false;
         if(itemsFactura.getSubtotal() == null) return false;
@@ -50,7 +48,7 @@ public class ItemsFacturaController {
     }
 
     public void buscarPorId(Integer id) {
-        if(id > 0) {
+        if(id > 0 && id != null) {
             ItemsFactura itemsFactura = itemsFacturaDAO.buscarPorId(id);
             if(itemsFactura != null) {
                 System.out.println("Item factura encontrado: " + itemsFactura);
@@ -63,7 +61,7 @@ public class ItemsFacturaController {
     }
 
     public void eliminarItemFactura(Integer id) {
-        if(id > 0) {
+        if(id > 0 && id != null) {
             itemsFacturaDAO.eliminarItemFactura(id);
             logger.info("Item factura eliminado correctamente");
         }else {
