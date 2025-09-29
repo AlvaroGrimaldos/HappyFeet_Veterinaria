@@ -16,11 +16,11 @@ public class MenuGeneralView {
 
     public void mostrarMenu() {
         mostrarBienvenidaGeneral();
-        
+
         String opcion = "";
         while (!opcion.equals("0")) {
             mostrarMenuSeleccion();
-            
+
             try {
                 opcion = input.nextLine().trim();
                 procesarOpcion(opcion);
@@ -31,7 +31,7 @@ public class MenuGeneralView {
                 opcion = "";
             }
         }
-        
+
         mostrarDespedidaGeneral();
         input.close();
     }
@@ -45,7 +45,7 @@ public class MenuGeneralView {
         System.out.println("║                                                                               ║");
         System.out.println("║                    SISTEMA INTEGRAL DE GESTIÓN VETERINARIA                    ║");
         System.out.println("║                                                                               ║");
-        System.out.println("║                           Versión 1.0 - 2025                                 ║");
+        System.out.println("║                           Versión 1.0 - 2025                                  ║");
         System.out.println("║                                                                               ║");
         System.out.println("╚═══════════════════════════════════════════════════════════════════════════════╝");
         System.out.println("\n              🌟 Cuidando la salud de tus mascotas con amor 🌟\n");
@@ -54,38 +54,38 @@ public class MenuGeneralView {
 
     private void mostrarMenuSeleccion() {
         System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                        SELECCIÓN DE MÓDULO DEL SISTEMA                       ║");
-        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════╣");
-        System.out.println("║                                                                               ║");
-        System.out.println("║   Por favor, seleccione el módulo al que desea acceder:                      ║");
-        System.out.println("║                                                                               ║");
-        System.out.println("║   ┌─────────────────────────────────────────────────────────────────────┐   ║");
-        System.out.println("║   │                                                                     │   ║");
-        System.out.println("║   │  1. 👨‍⚕️  MÓDULO ADMINISTRATIVO                                      │   ║");
-        System.out.println("║   │                                                                     │   ║");
-        System.out.println("║   │     • Gestión de Pacientes (Dueños y Mascotas)                     │   ║");
-        System.out.println("║   │     • Gestión de Veterinarios                                      │   ║");
-        System.out.println("║   │     • Gestión de Citas Médicas                                     │   ║");
-        System.out.println("║   │     • Historial Clínico                                            │   ║");
-        System.out.println("║   │     • Reportes y Estadísticas                                      │   ║");
-        System.out.println("║   │                                                                     │   ║");
-        System.out.println("║   └─────────────────────────────────────────────────────────────────────┘   ║");
-        System.out.println("║                                                                               ║");
-        System.out.println("║   ┌─────────────────────────────────────────────────────────────────────┐   ║");
-        System.out.println("║   │                                                                     │   ║");
-        System.out.println("║   │  2. 🏪 MÓDULO DE INVENTARIO Y FACTURACIÓN                          │   ║");
-        System.out.println("║   │                                                                     │   ║");
-        System.out.println("║   │     • Gestión de Inventario                                        │   ║");
-        System.out.println("║   │     • Gestión de Facturas                                          │   ║");
-        System.out.println("║   │     • Items de Factura                                             │   ║");
-        System.out.println("║   │     • Tipos de Producto                                            │   ║");
-        System.out.println("║   │     • Control de Stock                                             │   ║");
-        System.out.println("║   │                                                                     │   ║");
-        System.out.println("║   └─────────────────────────────────────────────────────────────────────┘   ║");
-        System.out.println("║                                                                               ║");
-        System.out.println("║   0. 🚪 Salir del Sistema                                                    ║");
-        System.out.println("║                                                                               ║");
-        System.out.println("╚═══════════════════════════════════════════════════════════════════════════════╝");
+        System.out.println("║                        SELECCIÓN DE MÓDULO DEL SISTEMA                          ║");
+        System.out.println("╠═══════════════════════════════════════════════════════════════════════════════  ╣");
+        System.out.println("║                                                                                 ║");
+        System.out.println("║   Por favor, seleccione el módulo al que desea acceder:                         ║");
+        System.out.println("║                                                                                 ║");
+        System.out.println("║   ┌─────────────────────────────────────────────────────────────────────┐       ║");
+        System.out.println("║   │                                                                     │       ║");
+        System.out.println("║   │  1. 👨‍⚕️  MÓDULO ADMINISTRATIVO                                       │       ║");
+        System.out.println("║   │                                                                     │       ║");
+        System.out.println("║   │     • Gestión de Pacientes (Dueños y Mascotas)                      │       ║");
+        System.out.println("║   │     • Gestión de Veterinarios                                       │       ║");
+        System.out.println("║   │     • Gestión de Citas Médicas                                      │       ║");
+        System.out.println("║   │     • Historial Clínico                                             │       ║");
+        System.out.println("║   │     • Reportes y Estadísticas                                       │       ║");
+        System.out.println("║   │                                                                     │       ║");
+        System.out.println("║   └─────────────────────────────────────────────────────────────────────┘       ║");
+        System.out.println("║                                                                                 ║");
+        System.out.println("║   ┌─────────────────────────────────────────────────────────────────────┐       ║");
+        System.out.println("║   │                                                                     │       ║");
+        System.out.println("║   │  2. 🏪 MÓDULO DE INVENTARIO Y FACTURACIÓN                           │       ║");
+        System.out.println("║   │                                                                     │       ║");
+        System.out.println("║   │     • Gestión de Inventario                                         │       ║");
+        System.out.println("║   │     • Gestión de Facturas                                           │       ║");
+        System.out.println("║   │     • Items de Factura                                              │       ║");
+        System.out.println("║   │     • Tipos de Producto                                             │       ║");
+        System.out.println("║   │     • Control de Stock                                              │       ║");
+        System.out.println("║   │                                                                     │       ║");
+        System.out.println("║   └─────────────────────────────────────────────────────────────────────┘       ║");
+        System.out.println("║                                                                                 ║");
+        System.out.println("║   0. 🚪 Salir del Sistema                                                       ║");
+        System.out.println("║                                                                                 ║");
+        System.out.println("╚═══════════════════════════════════════════════════════════════════════════════==╝");
         System.out.print("\n>>> Seleccione un módulo [1-2, 0]: ");
     }
 
@@ -97,18 +97,18 @@ public class MenuGeneralView {
                 pausar();
                 menuAdministrativo.mostrarMenu();
                 break;
-                
+
             case "2":
                 LoggerUtil.info("Accediendo al Módulo de Inventario y Facturación");
                 System.out.println("\n✓ Cargando Módulo de Inventario y Facturación...\n");
                 pausar();
                 menuInventario.mostrarMenu();
                 break;
-                
+
             case "0":
                 LoggerUtil.info("Usuario solicitó salir del sistema");
                 break;
-                
+
             default:
                 System.out.println("\n❌ Opción inválida. Por favor seleccione 1, 2 o 0.");
                 pausar();

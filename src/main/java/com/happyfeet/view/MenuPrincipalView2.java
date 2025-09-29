@@ -4,8 +4,7 @@ import com.happyfeet.controller.FacturaController;
 import com.happyfeet.controller.InventarioController;
 import com.happyfeet.controller.ItemsFacturaController;
 import com.happyfeet.controller.ProductoTipoController;
-import com.happyfeet.repository.IInventarioDAO;
-import com.happyfeet.repository.InventarioDAO;
+import com.happyfeet.repository.*;
 import com.happyfeet.util.LoggerUtil;
 
 import java.util.Scanner;
@@ -17,19 +16,28 @@ public class MenuPrincipalView2 {
     private final ItemsFacturaView itemsFacturaView;
     private final ProductoTipoView productoTipoView;
 
+    // Declarar todos los DAOs como atributos de clase
+    private final IInventarioDAO inventarioDAO;
+    private final IItemsFacturaDAO itemsFacturaDAO;
+    private final IFacturasDAO facturaDAO;
+    private final IProductoTipoDAO productoTipoDAO;
+
     public MenuPrincipalView2() {
         this.input = new Scanner(System.in);
-        
+
         // Inicializar DAO compartido
-        IInventarioDAO inventarioDAO = new InventarioDAO();
-        
-        // Inicializar controllers
-        FacturaController facturaController = new FacturaController();
-        InventarioController inventarioController = new InventarioController();
-        ItemsFacturaController itemsFacturaController = new ItemsFacturaController();
-        ProductoTipoController productoTipoController = new ProductoTipoController();
-        
-        // Inicializar views
+        this.inventarioDAO = new InventarioDAO();
+        this.itemsFacturaDAO = new ItemsFacturaDAO();
+        this.facturaDAO = new FacturaDAO();
+        this.productoTipoDAO = new ProductoTipoDAO(); // Añadir este DAO
+
+        // Inicializar controladores
+        FacturaController facturaController = new FacturaController(facturaDAO, itemsFacturaDAO, inventarioDAO);
+        InventarioController inventarioController = new InventarioController(inventarioDAO);
+        ItemsFacturaController itemsFacturaController = new ItemsFacturaController(itemsFacturaDAO, inventarioDAO);
+        ProductoTipoController productoTipoController = new ProductoTipoController(productoTipoDAO);
+
+        // Inicializar vistas
         this.facturaView = new FacturaView(facturaController, inventarioDAO);
         this.inventarioView = new InventarioView(inventarioController, inventarioDAO);
         this.itemsFacturaView = new ItemsFacturaView(itemsFacturaController, inventarioDAO);
@@ -38,11 +46,11 @@ public class MenuPrincipalView2 {
 
     public void mostrarMenu() {
         mostrarBienvenida();
-        
+
         String opcion = "";
         while (!opcion.equals("0")) {
             mostrarMenuPrincipal();
-            
+
             try {
                 opcion = input.nextLine().trim();
                 procesarOpcion(opcion);
@@ -53,7 +61,7 @@ public class MenuPrincipalView2 {
                 opcion = "";
             }
         }
-        
+
         mostrarDespedida();
     }
 
@@ -105,26 +113,26 @@ public class MenuPrincipalView2 {
                 LoggerUtil.info("Accediendo al módulo de Gestión de Inventario");
                 inventarioView.mostrarMenu();
                 break;
-                
+
             case "2":
                 LoggerUtil.info("Accediendo al módulo de Gestión de Facturas");
                 facturaView.mostrarMenu();
                 break;
-                
+
             case "3":
                 LoggerUtil.info("Accediendo al módulo de Gestión de Items de Factura");
                 itemsFacturaView.mostrarMenu();
                 break;
-                
+
             case "4":
                 LoggerUtil.info("Accediendo al módulo de Gestión de Tipos de Producto");
                 productoTipoView.mostrarMenu();
                 break;
-                
+
             case "0":
                 LoggerUtil.info("Volviendo al menú principal general");
                 break;
-                
+
             default:
                 System.out.println("\n❌ Opción inválida. Por favor seleccione una opción válida (1-4, 0).");
                 pausar();
