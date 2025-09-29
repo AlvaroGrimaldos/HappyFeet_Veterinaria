@@ -66,14 +66,26 @@ public class PacienteController {
         if (duenos.isEmpty()) {
             System.out.println("No hay dueños registrados");
         } else {
-            System.out.println("\n=== LISTA DE DUEÑOS ===");
+            System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                                            LISTA DE DUEÑOS                                                 ║");
+            System.out.println("╠════╦══════════════════════════════╦═══════════════╦═══════════════════════════════════╦═══════════════════╣");
+            System.out.println("║ ID ║            NOMBRE            ║   DOCUMENTO   ║               EMAIL               ║     TELÉFONO      ║");
+            System.out.println("╠════╬══════════════════════════════╬═══════════════╬═══════════════════════════════════╬═══════════════════╣");
+
             duenos.forEach(dueno -> {
-                System.out.printf("ID: %d | %s | Doc: %s | Tel: %s | Email: %s%n",
-                        dueno.getId(), dueno.getNombreCompleto(),
-                        dueno.getDocumentoIdentidad(), dueno.getTelefono(), dueno.getEmail());
+                System.out.printf("║ %-2d ║ %-28s ║ %-13s ║ %-33s ║ %-17s ║%n",
+                        dueno.getId(),
+                        truncarTexto(dueno.getNombreCompleto(), 28),
+                        dueno.getDocumentoIdentidad(),
+                        truncarTexto(dueno.getEmail(), 33),
+                        dueno.getTelefono());
             });
+
+            System.out.println("╚════╩══════════════════════════════╩═══════════════╩═══════════════════════════════════╩═══════════════════╝");
+            System.out.println("Total de dueños: " + duenos.size());
         }
     }
+
 
     public Dueno buscarDuenoPorId(Integer id) {
         return pacienteService.buscarDuenoPorId(id);
@@ -144,15 +156,32 @@ public class PacienteController {
         if (mascotas.isEmpty()) {
             System.out.println("No hay mascotas registradas");
         } else {
-            System.out.println("\n=== LISTA DE MASCOTAS ===");
+            System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                                              LISTA DE MASCOTAS                                                    ║");
+            System.out.println("╠════╦════════════════╦═══════════════════════════╦══════════════╦════════╦═════════════╦══════════════════════════╣");
+            System.out.println("║ ID ║     NOMBRE     ║           DUEÑO           ║     RAZA     ║  SEXO  ║  VACUNADO   ║       F.NACIMIENTO       ║");
+            System.out.println("╠════╬════════════════╬═══════════════════════════╬══════════════╬════════╬═════════════╬══════════════════════════╣");
+
             mascotas.forEach(mascota -> {
-                System.out.printf("ID: %d | %s (%s) | Dueño: %s | Raza: %s | Vacunado: %s%n",
-                        mascota.getId(), mascota.getNombre(), mascota.getSexo(),
-                        mascota.getNombreDueno(), mascota.getNombreRaza(), mascota.getVacunado());
+                System.out.printf("║ %-2d ║ %-12s ║ %-25s ║ %-12s ║ %-6s ║ %-11s ║ %-24s ║%n",
+                        mascota.getId(),
+                        truncarTexto(mascota.getNombre(), 12),
+                        truncarTexto(mascota.getNombreDueno() != null ? mascota.getNombreDueno() : "ID: " + mascota.getDuenoId(), 25),
+                        truncarTexto(mascota.getNombreRaza() != null ? mascota.getNombreRaza() : "ID: " + mascota.getRazaId(), 12),
+                        mascota.getSexo().toString(),
+                        mascota.getVacunado().toString(),
+                        mascota.getFechaNacimiento() != null ? mascota.getFechaNacimiento().toString() : "No especificada");
             });
+
+            System.out.println("╚════╩════════════════╩═══════════════════════════╩══════════════╩════════╩═════════════╩══════════════════════════╝");
+            System.out.println("Total de mascotas: " + mascotas.size());
         }
     }
-
+    private String truncarTexto(String texto, int longitud) {
+        if (texto == null) return "";
+        if (texto.length() <= longitud) return texto;
+        return texto.substring(0, longitud - 3) + "...";
+    }
     public void listarMascotasPorDueno(Integer duenoId) {
         List<Mascota> mascotas = pacienteService.buscarMascotasPorDueno(duenoId);
         if (mascotas.isEmpty()) {
@@ -318,4 +347,8 @@ public class PacienteController {
 
         return true;
     }
+
 }
+
+
+

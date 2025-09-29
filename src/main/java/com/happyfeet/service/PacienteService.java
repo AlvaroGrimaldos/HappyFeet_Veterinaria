@@ -150,11 +150,15 @@ public class PacienteService {
 
     public boolean eliminarMascota(Integer id) {
         try {
+            // Verificar si tiene citas activas
+            // Esto depende si tienes acceso al CitaDAO aquí
+
             mascotaDAO.eliminarMascota(id);
             LoggerUtil.operacionExitosa("Eliminación", "Mascota");
             return true;
         } catch (Exception e) {
             LoggerUtil.operacionFallida("Eliminación", "Mascota", e.getMessage());
+            System.out.println("Error " + e.getMessage());
             return false;
         }
     }

@@ -2,6 +2,7 @@ package com.happyfeet.view;
 
 import com.happyfeet.controller.VeterinarioController;
 import com.happyfeet.model.entities.Veterinario;
+import com.happyfeet.util.ValidadorUtil;
 
 import java.util.Scanner;
 
@@ -17,20 +18,17 @@ public class VeterinarioView {
     public void mostrarMenuPrincipal() {
         String opcion = "";
         while (!opcion.equals("0")) {
-            System.out.println("\n╔════════════════════════════════════════════════════════╗");
-            System.out.println("║            GESTIÓN DE VETERINARIOS - HAPPY FEET        ║");
-            System.out.println("╠════════════════════════════════════════════════════════╣");
-            System.out.println("║  1. Registrar nuevo veterinario                        ║");
-            System.out.println("║  2. Listar todos los veterinarios                      ║");
-            System.out.println("║  3. Listar veterinarios disponibles                    ║");
-            System.out.println("║  4. Buscar veterinario por documento                   ║");
-            System.out.println("║  5. Buscar veterinarios por nombre                     ║");
-            System.out.println("║  6. Ver perfil de veterinario                          ║");
-            System.out.println("║  7. Actualizar veterinario                             ║");
-            System.out.println("║  8. Eliminar veterinario                               ║");
-            System.out.println("║  9. Reportes y estadísticas                            ║");
-            System.out.println("║  0. Volver al menú principal                           ║");
-            System.out.println("╚════════════════════════════════════════════════════════╝");
+            System.out.println("\nGESTIÓN DE VETERINARIOS");
+            System.out.println(" 1. Registrar nuevo veterinario    ");
+            System.out.println(" 2. Listar todos los veterinarios    ");
+            System.out.println(" 3. Listar veterinarios disponibles    ");
+            System.out.println(" 4. Buscar veterinario por documento    ");
+            System.out.println(" 5. Buscar veterinarios por nombre    ");
+            System.out.println(" 6. Ver perfil de veterinario         ");
+            System.out.println(" 7. Actualizar veterinario             ");
+            System.out.println(" 8. Eliminar veterinario         ");
+            System.out.println(" 9. Reportes y estadísticas     ");
+            System.out.println(" 0. Volver al menú principal     ");
             System.out.print(">>> Seleccione una opción: ");
 
             try {
@@ -84,17 +82,58 @@ public class VeterinarioView {
     private void registrarVeterinario() {
         System.out.println("\n=== REGISTRAR NUEVO VETERINARIO ===");
 
-        System.out.print("Nombre completo: ");
-        String nombre = input.nextLine().trim();
+        String nombre = "";
+        String documento = "";
+        String telefono = "";
+        String email = "";
 
-        System.out.print("Documento de identidad: ");
-        String documento = input.nextLine().trim();
+        // Validar nombre
+        while (true) {
+            System.out.print("Nombre completo del veterinario: ");
+            nombre = input.nextLine().trim();
+            String errorNombre = ValidadorUtil.validarNombre(nombre);
+            if (errorNombre == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorNombre);
+            }
+        }
 
-        System.out.print("Teléfono: ");
-        String telefono = input.nextLine().trim();
+        // Validar documento
+        while (true) {
+            System.out.print("Documento de identidad: ");
+            documento = input.nextLine().trim();
+            String errorDocumento = ValidadorUtil.validarDocumento(documento);
+            if (errorDocumento == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorDocumento);
+            }
+        }
 
-        System.out.print("Email: ");
-        String email = input.nextLine().trim();
+        // Validar teléfono
+        while (true) {
+            System.out.print("Teléfono (solo números): ");
+            telefono = input.nextLine().trim();
+            String errorTelefono = ValidadorUtil.validarTelefono(telefono);
+            if (errorTelefono == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorTelefono);
+            }
+        }
+
+        // Validar email
+        while (true) {
+            System.out.print("Email profesional (debe contener @): ");
+            email = input.nextLine().trim();
+            String errorEmail = ValidadorUtil.validarEmail(email);
+            if (errorEmail == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorEmail);
+            }
+        }
 
         Veterinario veterinario = new Veterinario(nombre, documento, telefono, email);
         controller.registrarVeterinario(veterinario);

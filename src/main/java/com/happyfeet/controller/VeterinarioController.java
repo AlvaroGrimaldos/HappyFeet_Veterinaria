@@ -60,13 +60,29 @@ public class VeterinarioController {
         if (veterinarios.isEmpty()) {
             System.out.println("No hay veterinarios registrados");
         } else {
-            System.out.println("\n=== LISTA DE VETERINARIOS ===");
+            System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                                           LISTA DE VETERINARIOS                                                ║");
+            System.out.println("╠════╦════════════════════════════════╦═══════════════╦═════════════════════════════════════╦═════════════════╣");
+            System.out.println("║ ID ║            DOCTOR              ║   DOCUMENTO   ║                EMAIL                ║    TELÉFONO     ║");
+            System.out.println("╠════╬════════════════════════════════╬═══════════════╬═════════════════════════════════════╬═════════════════╣");
+
             veterinarios.forEach(vet -> {
-                System.out.printf("ID: %d | Dr. %s | Doc: %s | Tel: %s | Email: %s%n",
-                        vet.getId(), vet.getNombreCompleto(),
-                        vet.getDocumentoIdentidad(), vet.getTelefono(), vet.getEmail());
+                System.out.printf("║ %-2d ║ Dr. %-29s ║ %-13s ║ %-35s ║ %-15s ║%n",
+                        vet.getId(),
+                        truncarTexto(vet.getNombreCompleto(), 29),
+                        vet.getDocumentoIdentidad(),
+                        truncarTexto(vet.getEmail(), 35),
+                        vet.getTelefono());
             });
+
+            System.out.println("╚════╩════════════════════════════════╩═══════════════╩═════════════════════════════════════╩═════════════════╝");
+            System.out.println("Total de veterinarios: " + veterinarios.size());
         }
+    }
+    private String truncarTexto(String texto, int longitud) {
+        if (texto == null) return "";
+        if (texto.length() <= longitud) return texto;
+        return texto.substring(0, longitud - 3) + "...";
     }
 
     public void listarVeterinariosDisponibles() {

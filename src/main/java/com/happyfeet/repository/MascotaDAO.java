@@ -170,8 +170,16 @@ public class MascotaDAO implements IMascotaDAO {
 
         try(PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, id);
-            pstmt.executeUpdate();
+            int filasAfectadas = pstmt.executeUpdate();
+
+            if (filasAfectadas == 0) {
+                throw new RuntimeException("No se encontró la mascota con ID: " + id);
+            }
         } catch(SQLException e) {
+            if (e.getMessage().contains("foreign key constraint")) {
+                throw new RuntimeException("No se puede eliminar la mascota con ID: " + id +
+                        ". Tiene registros asociados (citas o historial médico). Elimine primero esos registros.");
+            }
             throw new RuntimeException("Error al eliminar la mascota con ID: " + id + "\n" + e.getMessage());
         }
     }

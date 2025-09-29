@@ -6,6 +6,7 @@ import com.happyfeet.model.entities.Mascota;
 import com.happyfeet.model.entities.HistorialMedico;
 import com.happyfeet.model.enums.SexoMascota;
 import com.happyfeet.model.enums.EstadoVacunacion;
+import com.happyfeet.util.ValidadorUtil;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -115,28 +116,75 @@ public class PacienteView {
     }
 
     private void registrarDueno() {
-        System.out.println("\n=== REGISTRAR NUEVO DUEÑO ===");
+        System.out.println("\n REGISTRAR NUEVO DUEÑO ");
 
-        System.out.print("Nombre completo: ");
-        String nombre = input.nextLine().trim();
+        String nombre = "";
+        String documento = "";
+        String telefono = "";
+        String email = "";
+        String direccion = "";
 
-        System.out.print("Documento de identidad: ");
-        String documento = input.nextLine().trim();
+        // Validar nombre
+        while (true) {
+            System.out.print("Nombre completo: ");
+            nombre = input.nextLine().trim();
+            String errorNombre = ValidadorUtil.validarNombre(nombre);
+            if (errorNombre == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorNombre);
+            }
+        }
 
+        // Validar documento
+        while (true) {
+            System.out.print("Documento de identidad: ");
+            documento = input.nextLine().trim();
+            String errorDocumento = ValidadorUtil.validarDocumento(documento);
+            if (errorDocumento == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorDocumento);
+            }
+        }
+
+        // Validar teléfono
+        while (true) {
+            System.out.print("Teléfono (solo números): ");
+            telefono = input.nextLine().trim();
+            String errorTelefono = ValidadorUtil.validarTelefono(telefono);
+            if (errorTelefono == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorTelefono);
+            }
+        }
+
+        // Validar email
+        while (true) {
+            System.out.print("Email (debe contener @): ");
+            email = input.nextLine().trim();
+            String errorEmail = ValidadorUtil.validarEmail(email);
+            if (errorEmail == null) {
+                break;
+            } else {
+                System.out.println("Error " + errorEmail);
+            }
+        }
+
+        // Dirección (sin validación especial)
         System.out.print("Dirección: ");
-        String direccion = input.nextLine().trim();
-
-        System.out.print("Teléfono: ");
-        String telefono = input.nextLine().trim();
-
-        System.out.print("Email: ");
-        String email = input.nextLine().trim();
+        direccion = input.nextLine().trim();
+        if (direccion.isEmpty()) {
+            System.out.println("Error: La dirección es obligatoria");
+            System.out.print("Dirección: ");
+            direccion = input.nextLine().trim();
+        }
 
         Dueno dueno = new Dueno(nombre, documento, direccion, telefono, email);
         controller.registrarDueno(dueno);
         pausar();
     }
-
     private void buscarDuenoPorDocumento() {
         System.out.print("\nIngrese el documento de identidad: ");
         String documento = input.nextLine().trim();
