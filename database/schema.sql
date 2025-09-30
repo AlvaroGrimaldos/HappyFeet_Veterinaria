@@ -1,3 +1,5 @@
+-- =========== TABLAS DE REFERENCIA ===========
+
 CREATE TABLE especies (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) UNIQUE NOT NULL
@@ -24,7 +26,9 @@ CREATE TABLE cita_estados (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) UNIQUE NOT NULL -- 'Programada', 'En Proceso', 'Finalizada', 'Cancelada'
 );
+
 -- =========== TABLAS OPERACIONALES DEL NEGOCIO ===========
+
 CREATE TABLE duenos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(255) NOT NULL,
@@ -48,20 +52,20 @@ CREATE TABLE mascotas (
 );
 
 CREATE TABLE veterinario (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-	nombre_completo VARCHAR(100) NOT NULL,
-	documento_identidad VARCHAR(20) UNIQUE NOT NULL,
-	telefono VARCHAR(20),
-	email VARCHAR(100) UNIQUE NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_completo VARCHAR(100) NOT NULL,
+    documento_identidad VARCHAR(20) UNIQUE NOT NULL,
+    telefono VARCHAR(20),
+    email VARCHAR(100) UNIQUE NOT NULL
 );
 
 CREATE TABLE centro_veterinario(
-	nit VARCHAR(30) NOT NULL,
-	id INT PRIMARY KEY,
-	nombre VARCHAR(100) NOT NULL,
-	telefono VARCHAR(100) NOT NULL,
-	direccion VARCHAR(225) NOT NULL,
-	email VARCHAR(100) NOT NULL
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nit VARCHAR(30) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    telefono VARCHAR(100) NOT NULL,
+    direccion VARCHAR(225) NOT NULL,
+    email VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE historial_medico (
@@ -72,7 +76,7 @@ CREATE TABLE historial_medico (
     descripcion TEXT,
     diagnostico TEXT,
     tratamiento_recomendado TEXT,
-    centro_veterinario_Id INT,
+    centro_veterinario_id INT,
     FOREIGN KEY (centro_veterinario_id) REFERENCES centro_veterinario(id),
     FOREIGN KEY (mascota_id) REFERENCES mascotas(id),
     FOREIGN KEY (evento_tipo_id) REFERENCES evento_tipos(id)
