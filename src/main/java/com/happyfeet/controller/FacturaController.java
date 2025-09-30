@@ -153,10 +153,39 @@ public class FacturaController {
         if (facturas.isEmpty()) {
             logger.info("No hay facturas registradas");
         } else {
-            facturas.forEach(System.out::println);
+            System.out.println("\n╔═══════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                                        LISTADO DE FACTURAS                                            ║");
+            System.out.println("╠════╦══════════════╦════════════════════════════╦════════════════╦══════════════════╦═════════════════╣");
+            System.out.println("║ ID ║  DUEÑO ID    ║       FECHA EMISIÓN        ║ CENTRO VET. ID ║      TOTAL       ║     ESTADO      ║");
+            System.out.println("╠════╬══════════════╬════════════════════════════╬════════════════╬══════════════════╬═════════════════╣");
+
+            facturas.forEach(f -> {
+                System.out.printf("║ %-2d ║ %12d ║ %-26s ║ %14d ║ $%,14.2f ║ %-15s ║%n",
+                        f.getId(),
+                        f.getDuenoId(),
+                        f.getFechaEmision() != null ? f.getFechaEmision().toString() : "N/A",
+                        f.getCentroVeterinarioId(),
+                        f.getTotal(),
+                        "Pagada");
+            });
+
+            System.out.println("╚════╩══════════════╩════════════════════════════╩════════════════╩══════════════════╩═════════════════╝");
+
+            // Estadísticas
+            double totalVentas = facturas.stream()
+                    .mapToDouble(f -> f.getTotal().doubleValue())
+                    .sum();
+
+            System.out.println("Total de facturas: " + facturas.size());
+            System.out.printf("Total ventas: $%,.2f%n", totalVentas);
         }
     }
 
+    private String truncarTexto(String texto, int longitud) {
+        if (texto == null) return "";
+        if (texto.length() <= longitud) return texto;
+        return texto.substring(0, longitud - 3) + "...";
+    }
     public void buscarPorId(Integer id) {
         if (id > 0 && id != null) {
             Facturas factura = facturaDAO.buscarPorId(id);

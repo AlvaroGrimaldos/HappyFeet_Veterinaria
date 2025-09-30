@@ -79,10 +79,61 @@ public class InventarioController {
         if(inventarios.isEmpty()) {
             logger.info("No hay inventario registrado");
         } else {
+            System.out.println("\n╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                                                    INVENTARIO DE PRODUCTOS                                                       ║");
+            System.out.println("╠════╦══════════════════════════════╦═══════════════╦══════════════╦═══════╦════════════╦══════════════╦════════════╦═════════════╣");
+            System.out.println("║ ID ║         PRODUCTO             ║     TIPO      ║  FABRICANTE  ║ LOTE  ║   STOCK    ║ STOCK MIN.   ║  F.VENC.   ║   PRECIO    ║");
+            System.out.println("╠════╬══════════════════════════════╬═══════════════╬══════════════╬═══════╬════════════╬══════════════╬════════════╬═════════════╣");
+
+            inventarios.forEach(i -> {
+                System.out.printf("║ %-2d ║ %-28s ║ %-13s ║ %-12s ║ %-5s ║ %10d ║ %12d ║ %-10s ║ $%,10.2f ║%n",
+                        i.getId(),
+                        truncarTexto(i.getNombreProducto(), 28),
+                        truncarTexto(obtenerNombreTipo(i.getProductoTipoId()), 13),
+                        truncarTexto(i.getFabricante(), 12),
+                        truncarTexto(i.getLote(), 5),
+                        i.getCantidadStock(),
+                        i.getStockMinimo(),
+                        i.getFechaVencimiento() != null ? i.getFechaVencimiento().toString() : "N/A",
+                        i.getPrecioVenta());
+
+                // Alerta de stock bajo
+                if (i.getCantidadStock() <= i.getStockMinimo()) {
+                    System.out.println("║    ⚠️  ALERTA: Stock bajo o crítico                                                                                                    ║");
+                }
+            });
+
+            System.out.println("╚════╩══════════════════════════════╩═══════════════╩══════════════╩═══════╩════════════╩══════════════╩════════════╩═════════════╝");
+            System.out.println("Total de productos: " + inventarios.size());
+
+            // Estadísticas adicionales
+            long stockBajo = inventarios.stream()
+                    .filter(i -> i.getCantidadStock() <= i.getStockMinimo())
+                    .count();
+
+            if (stockBajo > 0) {
+                System.out.println("⚠️  Productos con stock bajo: " + stockBajo);
+            }
+
             logger.info("Se encontraron {} productos en inventario", inventarios.size());
-            inventarios.forEach(i -> System.out.println(i));
         }
         return inventarios;
+    }
+
+    // Método auxiliar para obtener nombre del tipo
+    private String obtenerNombreTipo(Integer tipoId) {
+        switch(tipoId) {
+            case 1: return "Medicamento";
+            case 2: return "Vacuna";
+            case 3: return "Insumo Médico";
+            case 4: return "Alimento";
+            default: return "Desconocido";
+        }
+    }
+    private String truncarTexto(String texto, int longitud) {
+        if (texto == null) return "";
+        if (texto.length() <= longitud) return texto;
+        return texto.substring(0, longitud - 3) + "...";
     }
 
     public Inventario buscarPorId(Integer id) {
