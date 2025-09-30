@@ -18,22 +18,47 @@ public class MenuGeneralView {
         mostrarBienvenidaGeneral();
 
         String opcion = "";
-        while (!opcion.equals("0")) {
+        boolean continuar = true;
+        while (continuar) {
             mostrarMenuSeleccion();
 
-            try {
+            // Intentar leer la entrada con un manejo más robusto
+            if (input.hasNextLine()) {
                 opcion = input.nextLine().trim();
-                procesarOpcion(opcion);
-            } catch (Exception e) {
-                LoggerUtil.error("Error al procesar la opción: " + e.getMessage());
-                System.out.println("❌ Error inesperado. Intente nuevamente.");
-                pausar();
-                opcion = "";
+                try {
+                    procesarOpcion(opcion);
+                } catch (Exception e) {
+                    LoggerUtil.error("Error al procesar la opción del menú: " + e.getMessage());
+                    System.out.println("❌ Error inesperado al procesar la opción. Intente nuevamente.");
+                    pausar();
+                }
+                if (opcion.equals("0")) {
+                    continuar = false; // Fuerza la salida del bucle al seleccionar "0"
+                }
+            } else {
+                LoggerUtil.error("No hay entrada disponible para leer la opción");
+                System.out.println("❌ Error: No se pudo leer la entrada. ¿Desea reiniciar o salir? (R/S)");
+                if (input.hasNextLine()) {
+                    String respuesta = input.nextLine().trim().toUpperCase();
+                    if ("S".equals(respuesta)) {
+                        continuar = false; // Sale del programa
+                    } else if ("R".equals(respuesta)) {
+                        opcion = ""; // Reinicia el bucle
+                    } else {
+                        System.out.println("❌ Opción no válida. Cerrando programa.");
+                        continuar = false;
+                    }
+                } else {
+                    System.out.println("❌ No se pudo leer respuesta. Cerrando programa.");
+                    continuar = false;
+                }
             }
         }
 
         mostrarDespedidaGeneral();
-        input.close();
+        if (input != null && input.ioException() == null) {
+            input.close();
+        }
     }
 
     private void mostrarBienvenidaGeneral() {
@@ -97,18 +122,15 @@ public class MenuGeneralView {
                 pausar();
                 menuAdministrativo.mostrarMenu();
                 break;
-
             case "2":
                 LoggerUtil.info("Accediendo al Módulo de Inventario y Facturación");
                 System.out.println("\n✓ Cargando Módulo de Inventario y Facturación...\n");
                 pausar();
                 menuInventario.mostrarMenu();
                 break;
-
             case "0":
                 LoggerUtil.info("Usuario solicitó salir del sistema");
                 break;
-
             default:
                 System.out.println("\n❌ Opción inválida. Por favor seleccione 1, 2 o 0.");
                 pausar();
@@ -154,6 +176,16 @@ public class MenuGeneralView {
 
     private void pausar() {
         System.out.print("\nPresione ENTER para continuar...");
-        input.nextLine();
+        try {
+            if (input.hasNextLine()) {
+                input.nextLine(); // Lee la entrada solo si está disponible
+            } else {
+                LoggerUtil.info("No hay línea disponible para pausar. Continuando automáticamente.");
+                System.out.println(); // Salto de línea para mantener formato
+            }
+        } catch (Exception e) {
+            LoggerUtil.error("Error al pausar: " + e.getMessage());
+            System.out.println(); // Salto de línea como fallback
+        }
     }
 }

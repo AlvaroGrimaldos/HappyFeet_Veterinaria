@@ -2,16 +2,14 @@ package com.happyfeet.view;
 
 import com.happyfeet.controller.InventarioController;
 import com.happyfeet.model.entities.Inventario;
-import com.happyfeet.model.entities.Medicamento;
 import com.happyfeet.model.entities.creator.*;
 import com.happyfeet.repository.IInventarioDAO;
-import com.happyfeet.repository.InventarioDAO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
@@ -64,144 +62,219 @@ public class InventarioView {
                         break;
                     default:
                         logger.info("Error. Opcion no valida.");
-                        System.out.println("Presione cualquier tecla para continuar ...");
+                        System.out.println("Presione Enter para continuar...");
                         input.nextLine();
                 }
-            }catch (Exception e){
-                logger.info("Error al leer la opcion del menu {}", e.getMessage());
-                System.out.println("Presione cualquier tecla para continuar...");
+            } catch (Exception e) {
+                logger.error("Error al leer la opcion del menu: {}", e.getMessage());
+                System.out.println("Presione Enter para continuar...");
                 input.nextLine();
                 opcion = "";
             }
         }
-        input.close();
     }
 
     public void listarTodos() {
         System.out.println("\n\n --- 1. LISTAR TODO EL INVENTARIO:\n");
         controller.listarTodos();
+        System.out.println("\nPresione Enter para continuar...");
+        input.nextLine();
     }
 
     private void agregarInventario() {
         System.out.println("\n\n --- 2. AGREGAR INVENTARIO:\n");
         try {
-            System.out.println("Nombre: ");
-            String nombre = input.nextLine();
+            System.out.print("Nombre: ");
+            String nombre = input.nextLine().trim();
 
-            Integer productoTipoId = leerEntero(input, "Inventario ID: ");
-            if (productoTipoId < 1 || productoTipoId > 4) {
-                logger.info("Error. Tipo de producto no valido");
+            // Validación del tipo de producto
+            System.out.println("\nTipos de Producto:");
+            System.out.println("1. Medicamento");
+            System.out.println("2. Vacuna");
+            System.out.println("3. Insumo Médico");
+            System.out.println("4. Alimento");
+            System.out.print("Seleccione el tipo (1-4): ");
+
+            Integer productoTipoId = null;
+            try {
+                productoTipoId = Integer.parseInt(input.nextLine().trim());
+            } catch (NumberFormatException e) {
+                logger.error("Error. Debe ingresar un número");
+                System.out.println("Presione Enter para continuar...");
+                input.nextLine();
+                return;
             }
 
-            System.out.println("Descripcion: ");
-            String descripcion = input.nextLine();
+            if (productoTipoId < 1 || productoTipoId > 4) {
+                logger.error("Error. Tipo de producto no válido (debe ser 1-4)");
+                System.out.println("Presione Enter para continuar...");
+                input.nextLine();
+                return;
+            }
 
-            System.out.println("Fabricante: ");
-            String fabricante = input.nextLine();
+            System.out.print("Descripción: ");
+            String descripcion = input.nextLine().trim();
 
-            System.out.println("Lote: ");
-            String lote = input.nextLine();
+            System.out.print("Fabricante: ");
+            String fabricante = input.nextLine().trim();
 
-            System.out.println("Cantidad Stock: ");
-            Integer cantidadStock = input.nextInt();
+            System.out.print("Lote: ");
+            String lote = input.nextLine().trim();
 
-            System.out.println("Stock Minimo: ");
-            Integer stockMinimo = input.nextInt();
+            System.out.print("Cantidad Stock: ");
+            Integer cantidadStock = null;
+            try {
+                cantidadStock = Integer.parseInt(input.nextLine().trim());
+            } catch (NumberFormatException e) {
+                logger.error("Error. Cantidad de stock inválida");
+                System.out.println("Presione Enter para continuar...");
+                input.nextLine();
+                return;
+            }
 
+            System.out.print("Stock Mínimo: ");
+            Integer stockMinimo = null;
+            try {
+                stockMinimo = Integer.parseInt(input.nextLine().trim());
+            } catch (NumberFormatException e) {
+                logger.error("Error. Stock mínimo inválido");
+                System.out.println("Presione Enter para continuar...");
+                input.nextLine();
+                return;
+            }
 
-            System.out.println("Fecha de Vencimiento (YYYY-MM-DD): ");
+            System.out.print("Fecha de Vencimiento (YYYY-MM-DD): ");
             LocalDate fecha = null;
             try {
-                fecha = LocalDate.parse(input.nextLine().trim());
-            }catch (DateTimeParseException e){
-                logger.error("Formato de fecha invalido. Use el formato YYYY-MM-DD");
+                String fechaStr = input.nextLine().trim();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                fecha = LocalDate.parse(fechaStr, formatter);
+            } catch (DateTimeParseException e) {
+                logger.error("Formato de fecha inválido. Use el formato YYYY-MM-DD");
+                System.out.println("Presione Enter para continuar...");
+                input.nextLine();
+                return;
             }
 
-            System.out.println("Precio de Venta: ");
-            BigDecimal precioVenta = input.nextBigDecimal();
-            input.nextLine();
+            System.out.print("Precio de Venta: ");
+            BigDecimal precioVenta = null;
+            try {
+                precioVenta = new BigDecimal(input.nextLine().trim());
+            } catch (NumberFormatException e) {
+                logger.error("Error. Precio de venta inválido");
+                System.out.println("Presione Enter para continuar...");
+                input.nextLine();
+                return;
+            }
 
-            Inventario nuevoInventario = crearInventarioPorTipo(productoTipoId, nombre, fabricante, descripcion, lote, stockMinimo, cantidadStock, fecha, precioVenta);
+            Inventario nuevoInventario = crearInventarioPorTipo(
+                    productoTipoId, nombre, fabricante, descripcion, lote,
+                    stockMinimo, cantidadStock, fecha, precioVenta
+            );
 
             if (nuevoInventario != null) {
                 controller.agregarInventario(nuevoInventario);
-                logger.info("Inventario agregado con exito");
+                System.out.println("\n✓ Inventario agregado con éxito");
             } else {
-                logger.info("Error. No se pudo crear el inventario");
+                logger.error("Error. No se pudo crear el inventario");
             }
-        }catch (Exception e){
-            logger.error("Error al agregar inventario: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error al agregar inventario: {}", e.getMessage(), e);
         }
+
+        System.out.println("\nPresione Enter para continuar...");
+        input.nextLine();
     }
 
-    private void buscarPorId(){
+    private void buscarPorId() {
         System.out.println("\n\n --- 3. BUSCAR POR ID:\n");
         try {
-            Integer id = leerEntero(input, "ID: ");
-            input.nextLine();
-            if(id > 0) {
-                controller.buscarPorId(id);
-            }else {
-                logger.info("Error. ID negativo");
-            }
-        }catch (Exception e){
-            logger.info("Error. ID invalido");
-        }
-    }
+            System.out.print("ID: ");
+            Integer id = Integer.parseInt(input.nextLine().trim());
 
+            if (id > 0) {
+                controller.buscarPorId(id);
+            } else {
+                logger.error("Error. ID debe ser positivo");
+            }
+        } catch (NumberFormatException e) {
+            logger.error("Error. ID inválido");
+        }
+
+        System.out.println("\nPresione Enter para continuar...");
+        input.nextLine();
+    }
 
     private void eliminarInventario() {
         System.out.println("\n\n --- 4. ELIMINAR UN INVENTARIO:\n");
-        Integer id = leerEntero(input, "ID: ");
-        input.nextLine();
+        try {
+            System.out.print("ID: ");
+            Integer id = Integer.parseInt(input.nextLine().trim());
 
-        if(id > 0){
-            controller.eliminarInventario(id);
-            logger.info("Inventario eliminado correctamente: {}", id);
-        }else {
-            logger.info("Error. ID negativo");
+            if (id > 0) {
+                System.out.print("¿Está seguro de eliminar el inventario con ID " + id + "? (S/N): ");
+                String confirmacion = input.nextLine().trim().toUpperCase();
+
+                if (confirmacion.equals("S")) {
+                    controller.eliminarInventario(id);
+                    System.out.println("\n✓ Inventario eliminado correctamente");
+                } else {
+                    System.out.println("Operación cancelada");
+                }
+            } else {
+                logger.error("Error. ID debe ser positivo");
+            }
+        } catch (NumberFormatException e) {
+            logger.error("Error. ID inválido");
         }
+
+        System.out.println("\nPresione Enter para continuar...");
+        input.nextLine();
     }
 
     private void agregarStockInventario() {
         System.out.println("\n\n --- 5. AGREGAR STOCK AL INVENTARIO:\n");
         try {
-            Integer id = leerEntero(input, "ID: ");
-            input.nextLine();
+            System.out.print("ID: ");
+            Integer id = Integer.parseInt(input.nextLine().trim());
 
             Inventario inventario = inventarioDAO.buscarPorId(id);
             if (inventario == null) {
                 System.out.println("Error: No se encontró inventario con ID: " + id);
+                System.out.println("\nPresione Enter para continuar...");
+                input.nextLine();
                 return;
             }
 
-            Integer cantidad = leerEntero(input, "Cantidad a agregar: ");
-            input.nextLine();
+            System.out.print("Cantidad a agregar: ");
+            Integer cantidad = Integer.parseInt(input.nextLine().trim());
 
-            System.out.println("Nueva Fecha de Vencimiento (YYYY-MM-DD): ");
-            LocalDate fecha = LocalDate.parse(input.nextLine().trim());
+            System.out.print("Nueva Fecha de Vencimiento (YYYY-MM-DD): ");
+            String fechaStr = input.nextLine().trim();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate fecha = LocalDate.parse(fechaStr, formatter);
 
-            if (id > 0) {
+            if (cantidad > 0) {
                 controller.agregarStock(inventario, cantidad, fecha);
+                System.out.println("\n✓ Stock agregado con éxito");
+            } else {
+                logger.error("Error. La cantidad debe ser positiva");
             }
-        }catch (Exception e){
-            logger.error("Error al agregar stock. {}", e.getMessage());
+        } catch (NumberFormatException e) {
+            logger.error("Error. Número inválido");
+        } catch (DateTimeParseException e) {
+            logger.error("Error. Formato de fecha inválido. Use YYYY-MM-DD");
+        } catch (Exception e) {
+            logger.error("Error al agregar stock: {}", e.getMessage(), e);
         }
+
+        System.out.println("\nPresione Enter para continuar...");
+        input.nextLine();
     }
 
-    private static int leerEntero(Scanner scanner, String mensaje){
-        System.out.println(mensaje);
-
-        while(!scanner.hasNextInt()) {
-            System.out.println("Ingresa un numero entero valido: ");
-            scanner.next();
-        }
-        int numero = scanner.nextInt();
-        scanner.nextLine();
-        return numero;
-    }
-
-    private Inventario crearInventarioPorTipo(Integer tipoId, String nombre, String fabricante, String descripcion, String lote, Integer stockMinimo, Integer cantidadStock, LocalDate fecha, BigDecimal precioVenta) {
+    private Inventario crearInventarioPorTipo(Integer tipoId, String nombre, String fabricante,
+                                              String descripcion, String lote, Integer stockMinimo,
+                                              Integer cantidadStock, LocalDate fecha, BigDecimal precioVenta) {
         InventarioCreator creator = null;
 
         switch (tipoId) {
@@ -218,11 +291,11 @@ public class InventarioView {
                 creator = new AlimentoCreator();
                 break;
             default:
-                logger.info("Tipo de producto no reconocido: {}", tipoId);
+                logger.error("Tipo de producto no reconocido: {}", tipoId);
                 return null;
         }
 
-        return creator.createInventario(nombre, tipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fecha, precioVenta);
+        return creator.createInventario(nombre, tipoId, fabricante, descripcion, lote,
+                stockMinimo, cantidadStock, fecha, precioVenta);
     }
-
 }

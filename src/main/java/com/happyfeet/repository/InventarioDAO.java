@@ -33,9 +33,13 @@ public class InventarioDAO implements IInventarioDAO{
             pstmt.setInt(7, inventario.getStockMinimo());
             pstmt.setDate(8, Date.valueOf(inventario.getFechaVencimiento()));
             pstmt.setBigDecimal(9, inventario.getPrecioVenta());
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                logger.info("Inventario agregado correctamente: {}", inventario.getNombreProducto());
+            }
         }catch (SQLException e){
-            logger.info("Error al agregar el inentario.{}", e.getMessage());
+            logger.error("Error al agregar el inventario: {}", e.getMessage(), e);
         }
     }
 
@@ -59,10 +63,12 @@ public class InventarioDAO implements IInventarioDAO{
                         rs.getDate("fecha_vencimiento").toLocalDate(),
                         rs.getBigDecimal("precio_venta"));
 
-                lst.add(i);
+                if (i != null) {
+                    lst.add(i);
+                }
             }
         }catch(SQLException e) {
-            logger.error("Error al consultar todo el inventario{}", e.getMessage());
+            logger.error("Error al consultar todo el inventario: {}", e.getMessage(), e);
         }
         return lst;
     }
@@ -81,8 +87,8 @@ public class InventarioDAO implements IInventarioDAO{
                             rs.getInt("id"),
                             rs.getString("descripcion"),
                             rs.getInt("producto_tipo_id"),
-                            rs.getString("lote"),
                             rs.getString("fabricante"),
+                            rs.getString("lote"),
                             rs.getInt("cantidad_stock"),
                             rs.getInt("stock_minimo"),
                             rs.getDate("fecha_vencimiento").toLocalDate(),
@@ -91,7 +97,7 @@ public class InventarioDAO implements IInventarioDAO{
                 }
             }
         }catch (SQLException e) {
-            logger.error("Error al buscar inventario por ID{}: {}", id, e.getMessage());
+            logger.error("Error al buscar inventario por ID {}: {}", id, e.getMessage(), e);
         }
         return null;
     }
@@ -111,9 +117,15 @@ public class InventarioDAO implements IInventarioDAO{
             pstmt.setDate(8, Date.valueOf(inventario.getFechaVencimiento()));
             pstmt.setBigDecimal(9, inventario.getPrecioVenta());
             pstmt.setInt(10, inventario.getId());
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                logger.info("Inventario actualizado correctamente: ID {}", inventario.getId());
+            } else {
+                logger.warn("No se encontró inventario con ID {} para actualizar", inventario.getId());
+            }
         }catch (SQLException e) {
-            logger.info("Error al actualizar el inventario con id {}: {}", inventario.getId(), e.getMessage());
+            logger.error("Error al actualizar el inventario con id {}: {}", inventario.getId(), e.getMessage(), e);
         }
     }
 
@@ -123,13 +135,19 @@ public class InventarioDAO implements IInventarioDAO{
 
         try(PreparedStatement pstmt = con.prepareStatement(sql)){
             pstmt.setInt(1, id);
-            pstmt.executeUpdate();
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                logger.info("Inventario eliminado correctamente: ID {}", id);
+            } else {
+                logger.warn("No se encontró inventario con ID {} para eliminar", id);
+            }
         }catch (SQLException e) {
-            logger.info("Error al eliminar el inventario con id {}: {}", id, e.getMessage());
+            logger.error("Error al eliminar el inventario con id {}: {}", id, e.getMessage(), e);
         }
     }
 
-    private Inventario crearInventarioPorTipo(String nombreProducto, Integer id, String descripcion, Integer productoTipoId, String lote, String fabricante, Integer cantidadStock, Integer stockMinimo, LocalDate fechaVencimiento, BigDecimal precioVenta) {
+    private Inventario crearInventarioPorTipo(String nombreProducto, Integer id, String descripcion, Integer productoTipoId, String fabricante, String lote, Integer cantidadStock, Integer stockMinimo, LocalDate fechaVencimiento, BigDecimal precioVenta) {
         Inventario inventario = null;
         switch(productoTipoId) {
             case 1:
@@ -145,7 +163,7 @@ public class InventarioDAO implements IInventarioDAO{
                 inventario = new Alimento(nombreProducto, productoTipoId, fabricante, descripcion, lote, stockMinimo, cantidadStock, fechaVencimiento, precioVenta);
                 break;
             default:
-                logger.info("Tipo de producto no reconocido.{}", productoTipoId);
+                logger.warn("Tipo de producto no reconocido: {}", productoTipoId);
                 return null;
         }
 
@@ -153,13 +171,11 @@ public class InventarioDAO implements IInventarioDAO{
             inventario.setId(id);
         }
 
-
         return inventario;
     }
 
-
-
     public void addObserver(Observer o) { observers.add(o);}
+
     public void notifyObservers(Inventario i) {
         observers.forEach(o -> o.update(i));
     }
@@ -171,7 +187,9 @@ public class InventarioDAO implements IInventarioDAO{
             int nuevoStock = i.getCantidadStock() - cantidadVendida;
 
             if(nuevoStock < 0) {
-                logger.error("Error: Stock Insuficiente. Stock actual {}", i.getCantidadStock());
+                logger.error("Error: Stock Insuficiente para {}. Stock actual: {}, cantidad solicitada: {}",
+                        i.getNombreProducto(), i.getCantidadStock(), cantidadVendida);
+                return; // CRÍTICO: Detener la ejecución si no hay stock suficiente
             }
 
             pstmt.setInt(1, nuevoStock);
@@ -179,15 +197,16 @@ public class InventarioDAO implements IInventarioDAO{
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
+                int stockAnterior = i.getCantidadStock();
                 i.setCantidadStock(nuevoStock);
-                logger.info("Stock actualizado para {}: {} -> {}",
-                        i.getNombreProducto(), i.getCantidadStock() + cantidadVendida, nuevoStock);
+                logger.info("Stock actualizado para {}: {} -> {} (-{})",
+                        i.getNombreProducto(), stockAnterior, nuevoStock, cantidadVendida);
 
                 notifyObservers(i);
             }
 
         } catch (SQLException e) {
-            logger.info("Error al actualizar el stock del producto {}", i.getNombreProducto());
+            logger.error("Error al actualizar el stock del producto {}: {}", i.getNombreProducto(), e.getMessage(), e);
         }
     }
 
@@ -210,10 +229,12 @@ public class InventarioDAO implements IInventarioDAO{
                         i.getNombreProducto(), stockAnterior, nuevoStock, cantidad);
 
                 notifyObservers(i);
+            } else {
+                logger.warn("No se encontró inventario con ID {} para agregar stock", i.getId());
             }
 
         } catch (SQLException e) {
-            logger.info("Error al agregar stock del producto {}", i.getNombreProducto());
+            logger.error("Error al agregar stock del producto {}: {}", i.getNombreProducto(), e.getMessage(), e);
         }
     }
 }

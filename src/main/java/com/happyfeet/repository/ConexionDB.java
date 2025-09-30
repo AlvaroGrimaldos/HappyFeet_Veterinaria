@@ -8,7 +8,7 @@ import java.sql.SQLException;
 public class ConexionDB {
     private static String host = "jdbc:mysql://localhost:3306/happyfeet_database";
     private static String user = "root";
-    private static String password = "Alvaro2007@";
+    private static String password = "root";
 
     private static Connection connection;
     private static ConexionDB instancia;

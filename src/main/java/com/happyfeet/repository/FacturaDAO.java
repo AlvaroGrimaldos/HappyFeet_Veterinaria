@@ -21,10 +21,15 @@ public class FacturaDAO implements IFacturasDAO{
         pdfService = new PDFGeneratorService();
     }
 
-
     @Override
     public void agregarFactura(Facturas facturas) {
-        String sql = "insert into facturas(dueno_id, fecha_emision, total, centro_veterinario_id) values (?, ?, ?, ?)";
+        // SOLUCIÓN 1: Verifica primero que existan los IDs referenciados
+        if (!validarReferenciasForeignKey(facturas)) {
+            logger.error("Error: IDs inválidos. Verifica que el dueño y centro veterinario existan");
+            return;
+        }
+
+        String sql = "INSERT INTO facturas(dueno_id, fecha_emision, total, centro_veterinario_id) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, facturas.getDuenoId());
@@ -38,13 +43,28 @@ public class FacturaDAO implements IFacturasDAO{
                 logger.info("Factura agregada exitosamente");
             }
         } catch (SQLException e) {
-            logger.error("Error al agregar la factura: {}", e.getMessage());
+            logger.error("Error al agregar la factura: {}", e.getMessage(), e);
+            // Mostrar mensaje más específico según el error
+            if (e.getMessage().contains("foreign key constraint")) {
+                System.out.println("\nERROR: Uno de los IDs no existe en la base de datos:");
+                System.out.println("- Verifica que el ID del dueño exista en la tabla de clientes/dueños");
+                System.out.println("- Verifica que el ID del centro veterinario exista");
+            }
         }
     }
 
     @Override
     public Facturas agregarFacturaYRetornar(Facturas facturas) {
-        String sql = "insert into facturas(dueno_id, fecha_emision, total, centro_veterinario_id) values (?, ?, ?, ?)";
+        // SOLUCIÓN 1: Verifica primero que existan los IDs referenciados
+        if (!validarReferenciasForeignKey(facturas)) {
+            logger.error("Error: IDs inválidos. Verifica que el dueño y centro veterinario existan");
+            System.out.println("\nERROR: No se puede crear la factura.");
+            System.out.println("- Dueño ID " + facturas.getDuenoId() + " no existe en la base de datos");
+            System.out.println("- O Centro Veterinario ID " + facturas.getCentroVeterinarioId() + " no existe");
+            return null;
+        }
+
+        String sql = "INSERT INTO facturas(dueno_id, fecha_emision, total, centro_veterinario_id) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, facturas.getDuenoId());
@@ -68,10 +88,96 @@ public class FacturaDAO implements IFacturasDAO{
                 }
             }
         } catch (SQLException e) {
-            logger.error("Error al agregar la factura: {}", e.getMessage());
+            logger.error("Error al agregar la factura: {}", e.getMessage(), e);
+            if (e.getMessage().contains("foreign key constraint")) {
+                System.out.println("\nERROR DE BASE DE DATOS:");
+                System.out.println("Uno de los IDs referenciados no existe:");
+                System.out.println("- Dueño ID: " + facturas.getDuenoId());
+                System.out.println("- Centro Veterinario ID: " + facturas.getCentroVeterinarioId());
+            }
         }
 
         return null;
+    }
+
+    // MÉTODO NUEVO: Validar que existan las referencias antes de insertar
+    private boolean validarReferenciasForeignKey(Facturas facturas) {
+        // Validar que existe el dueño (tabla: duenos - PLURAL)
+        String sqlDueno = "SELECT COUNT(*) FROM duenos WHERE id = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sqlDueno)) {
+            pstmt.setInt(1, facturas.getDuenoId());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) == 0) {
+                    logger.error("No existe dueño con ID: {}", facturas.getDuenoId());
+                    System.out.println("\nERROR: No existe un dueño con ID: " + facturas.getDuenoId());
+                    System.out.println("Use la opción para listar dueños disponibles");
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error al validar dueño: {}", e.getMessage());
+            return false;
+        }
+
+        // Validar que existe el centro veterinario
+        String sqlCentro = "SELECT COUNT(*) FROM centro_veterinario WHERE id = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sqlCentro)) {
+            pstmt.setInt(1, facturas.getCentroVeterinarioId());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) == 0) {
+                    logger.error("No existe centro veterinario con ID: {}", facturas.getCentroVeterinarioId());
+                    System.out.println("\nERROR: No existe un centro veterinario con ID: " + facturas.getCentroVeterinarioId());
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error al validar centro veterinario: {}", e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    // MÉTODO NUEVO: Listar dueños disponibles
+    public void listarDuenosDisponibles() {
+        String sql = "SELECT id, nombre_completo FROM duenos ORDER BY id";
+        try (Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.println("\n=== DUEÑOS REGISTRADOS ===");
+            boolean hayDuenos = false;
+            while (rs.next()) {
+                System.out.println("ID: " + rs.getInt("id") + " - " + rs.getString("nombre_completo"));
+                hayDuenos = true;
+            }
+            if (!hayDuenos) {
+                System.out.println("No hay dueños registrados");
+            }
+            System.out.println("========================\n");
+        } catch (SQLException e) {
+            logger.error("Error al listar dueños: {}", e.getMessage());
+        }
+    }
+
+    // MÉTODO NUEVO: Listar centros veterinarios disponibles
+    public void listarCentrosDisponibles() {
+        String sql = "SELECT id, nombre FROM centro_veterinario ORDER BY id";
+        try (Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.println("\n=== CENTROS VETERINARIOS REGISTRADOS ===");
+            boolean hayCentros = false;
+            while (rs.next()) {
+                System.out.println("ID: " + rs.getInt("id") + " - " + rs.getString("nombre"));
+                hayCentros = true;
+            }
+            if (!hayCentros) {
+                System.out.println("No hay centros veterinarios registrados");
+            }
+            System.out.println("======================================\n");
+        } catch (SQLException e) {
+            logger.error("Error al listar centros veterinarios: {}", e.getMessage());
+        }
     }
 
     private void generarPDFAutomatico(Facturas factura) {
@@ -82,8 +188,8 @@ public class FacturaDAO implements IFacturasDAO{
                 boolean exito = pdfService.generarFacturaPDF(factura, items, rutaCompleta);
 
                 if (exito) {
-                    System.out.println("\n ¡FACTURA CREADA Y PDF GENERADO AUTOMÁTICAMENTE!");
-                    System.out.println(" Archivo guardado en: " + rutaCompleta);
+                    System.out.println("\n¡FACTURA CREADA Y PDF GENERADO AUTOMÁTICAMENTE!");
+                    System.out.println("Archivo guardado en: " + rutaCompleta);
                     mostrarResumenEnConsola(factura, items);
                 } else {
                     logger.warn("Factura creada pero falló la generación automática del PDF");
@@ -95,7 +201,6 @@ public class FacturaDAO implements IFacturasDAO{
             logger.warn("Error al generar PDF automático para factura {}: {}", factura.getId(), e.getMessage());
         }
     }
-
 
     @Override
     public List<Facturas> listarTodos() {
@@ -164,7 +269,6 @@ public class FacturaDAO implements IFacturasDAO{
         } catch (SQLException e) {
             logger.error("Error al eliminar la factura con ID: {}", id);
         }
-
     }
 
     private void eliminarItemsDeFactura(Integer facturaId) {
@@ -180,10 +284,9 @@ public class FacturaDAO implements IFacturasDAO{
 
     @Override
     public void imprimirFacturaPorId(Integer id) {
-        imprimirFacturaEnPDF(id, null); // Usar ruta por defecto
+        imprimirFacturaEnPDF(id, null);
     }
 
-    // Método mejorado para generar PDF
     public boolean imprimirFacturaEnPDF(Integer id, String rutaDestino) {
         Facturas factura = buscarPorId(id);
         if (factura == null) {
@@ -194,24 +297,19 @@ public class FacturaDAO implements IFacturasDAO{
         List<ItemsFactura> items = obtenerItemsDeFactura(id);
 
         try {
-            // Generar ruta si no se proporciona
             String rutaCompleta;
             if (rutaDestino == null) {
-                rutaCompleta = pdfService.generarRutaCompleta(id, null); // Usa ruta por defecto
+                rutaCompleta = pdfService.generarRutaCompleta(id, null);
             } else {
                 rutaCompleta = rutaDestino;
             }
 
-            // Generar el PDF
             boolean exito = pdfService.generarFacturaPDF(factura, items, rutaCompleta);
 
             if (exito) {
-                System.out.println("\n📄 ¡FACTURA GENERADA EXITOSAMENTE EN PDF!");
-                System.out.println("📁 Archivo guardado en: " + rutaCompleta);
-
-                // También mostrar resumen en consola
+                System.out.println("\n¡FACTURA GENERADA EXITOSAMENTE EN PDF!");
+                System.out.println("Archivo guardado en: " + rutaCompleta);
                 mostrarResumenEnConsola(factura, items);
-
                 return true;
             } else {
                 logger.error("Error al generar PDF para factura ID: {}", id);
@@ -302,7 +400,6 @@ public class FacturaDAO implements IFacturasDAO{
         return factura;
     }
 
-    // Método adicional para obtener facturas por dueño
     public List<Facturas> buscarPorDueno(Integer duenoId) {
         List<Facturas> facturas = new ArrayList<>();
         String sql = "SELECT * FROM facturas WHERE dueno_id = ? ORDER BY fecha_emision DESC";
@@ -329,7 +426,6 @@ public class FacturaDAO implements IFacturasDAO{
         return facturas;
     }
 
-    // Método para obtener total de ventas por período
     public java.math.BigDecimal obtenerTotalVentasPorPeriodo(java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin) {
         java.math.BigDecimal total = java.math.BigDecimal.ZERO;
         String sql = "SELECT SUM(total) as total_ventas FROM facturas WHERE fecha_emision BETWEEN ? AND ?";
@@ -353,12 +449,10 @@ public class FacturaDAO implements IFacturasDAO{
         return total;
     }
 
-    // Método para regenerar PDF de facturas existentes
     public boolean regenerarPDF(Integer facturaId, String rutaDestino) {
         return imprimirFacturaEnPDF(facturaId, rutaDestino);
     }
 
-    // Método para verificar si existe el PDF de una factura
     public boolean existePDF(Integer facturaId) {
         try {
             String rutaCompleta = pdfService.generarRutaCompleta(facturaId, null);
@@ -370,7 +464,6 @@ public class FacturaDAO implements IFacturasDAO{
         }
     }
 
-    // Método para obtener la ruta del PDF de una factura
     public String obtenerRutaPDF(Integer facturaId) {
         try {
             return pdfService.generarRutaCompleta(facturaId, null);
